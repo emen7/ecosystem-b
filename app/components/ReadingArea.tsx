@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 
 interface ReadingAreaProps {
@@ -16,12 +16,42 @@ const ReadingArea: React.FC<ReadingAreaProps> = ({
 }) => {
   const { theme } = useTheme();
   
+  // State
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const [paragraphs, setParagraphs] = useState<Array<{id: string, text: string}>>([]);
+  const [paragraphs, setParagraphs] = useState<Array<{id: string, number: number, text: string}>>([]);
+  const [sections, setSections] = useState<Array<{id: string, number: string, title: string}>>([]);
+  const [activePart, setActivePart] = useState("Part I: The Central and Superuniverses");
+  const [activeSection, setActiveSection] = useState("");
+  const [isSectionDropdownOpen, setIsSectionDropdownOpen] = useState(false);
+  const [showCopyToast, setShowCopyToast] = useState(false);
   
+  // Refs
+  const readingAreaRef = useRef<HTMLDivElement>(null);
+  const sectionDropdownRef = useRef<HTMLDivElement>(null);
+  
+  // Determine current part based on paper number
+  useEffect(() => {
+    if (!selectedPaper) return;
+    
+    const paperMatch = selectedPaper.match(/\d+/);
+    if (!paperMatch) return;
+    
+    const paperNum = parseInt(paperMatch[0], 10);
+    
+    if (paperNum <= 31) {
+      setActivePart("Part I: The Central and Superuniverses");
+    } else if (paperNum <= 56) {
+      setActivePart("Part II: The Local Universe");
+    } else if (paperNum <= 119) {
+      setActivePart("Part III: The History of Urantia");
+    } else {
+      setActivePart("Part IV: The Life and Teachings of Jesus");
+    }
+  }, [selectedPaper]);
+  
+  // Fetch content
   useEffect(() => {
     const fetchContent = async () => {
       try {
@@ -32,6 +62,7 @@ const ReadingArea: React.FC<ReadingAreaProps> = ({
         if (!selectedPaper) {
           setContent('Please select a paper.');
           setParagraphs([]);
+          setSections([]);
           setLoading(false);
           return;
         }
@@ -43,6 +74,7 @@ const ReadingArea: React.FC<ReadingAreaProps> = ({
         if (!paperNumber) {
           setContent('Invalid paper selection.');
           setParagraphs([]);
+          setSections([]);
           setLoading(false);
           return;
         }
@@ -57,60 +89,101 @@ const ReadingArea: React.FC<ReadingAreaProps> = ({
         }
         
         const data = await response.json();
-        console.log('Data fetched successfully:', data[0]);
+        
+        // Extract section information
+        const sectionItems = data.filter((item: any) => 
+          item.type === "section_title"
+        );
+        
+        setSections(
+          sectionItems.map((item: any) => {
+            const sectionId = item.paperSectionId.split(".")[1];
+            return {
+              id: `section-${sectionId}`,
+              number: sectionId,
+              title: item.text
+            };
+          })
+        );
         
         if (selectedSection) {
           const sectionMatch = selectedSection.match(/\d+/);
           const sectionNumber = sectionMatch ? sectionMatch[0] : null;
           
           if (sectionNumber) {
-            const sectionContent = data.find((item: any) => 
-              item.paperSectionId === `${paperNumber}.${sectionNumber}`);
+            // Set active section
+            setActiveSection(selectedSection);
             
-            if (sectionContent && sectionContent.text) {
-              setContent(sectionContent.text);
-              
-              // Process paragraphs for the section
-              const paragraphItems = data.filter((item: any) => 
-                item.type === "paragraph" && 
-                item.paperSectionId === `${paperNumber}.${sectionNumber}`
-              );
-              
-              setParagraphs(paragraphItems.map((item: any, index: number) => ({
-                id: `p-${paperNumber}-${sectionNumber}-${index + 1}`,
-                text: item.text
-              })));
+            // Process paragraphs for the section
+            const paragraphItems = data.filter((item: any) => 
+              item.type === "paragraph" && 
+              item.paperSectionId === `${paperNumber}.${sectionNumber}`
+            );
+            
+            setParagraphs(paragraphItems.map((item: any, index: number) => ({
+              id: `p-${paperNumber}-${sectionNumber}-${index + 1}`,
+              number: index + 1,
+              text: item.text
+            })));
+            
+            // If no paragraphs found, display message
+            if (paragraphItems.length === 0) {
+              setContent('No content found for this section.');
             } else {
-              setContent('Section content not found.');
-              setParagraphs([]);
+              setContent('');
             }
           } else {
             setContent('Invalid section selection.');
             setParagraphs([]);
           }
         } else {
-          // If no section is selected, show paper content
+          // If no section is selected, show all paragraphs
           const paragraphItems = data.filter((item: any) => item.type === "paragraph");
           
-          const paperContent = paragraphItems
-            .map((item: any) => item.text)
-            .join('\n\n');
+          // Group paragraphs by section
+          const groupedParagraphs: Record<string, any[]> = {};
           
-          setParagraphs(paragraphItems.map((item: any, index: number) => {
+          paragraphItems.forEach((item: any) => {
             const sectionId = item.paperSectionId?.split('.')[1] || '0';
-            return {
-              id: `p-${paperNumber}-${sectionId}-${index + 1}`,
-              text: item.text
-            };
-          }));
+            if (!groupedParagraphs[sectionId]) {
+              groupedParagraphs[sectionId] = [];
+            }
+            groupedParagraphs[sectionId].push(item);
+          });
           
-          setContent(paperContent || 'No content found for this paper.');
+          // Flatten and add paragraph numbers
+          const allParagraphs: {id: string, number: number, text: string}[] = [];
+          
+          Object.entries(groupedParagraphs).forEach(([sectionId, sectionParagraphs]) => {
+            sectionParagraphs.forEach((item, index) => {
+              allParagraphs.push({
+                id: `p-${paperNumber}-${sectionId}-${index + 1}`,
+                number: index + 1,
+                text: item.text
+              });
+            });
+          });
+          
+          setParagraphs(allParagraphs);
+          
+          // Use first section as active if available
+          if (sections.length > 0) {
+            setActiveSection(sections[0].title);
+          }
+          
+          // If no paragraphs found, display message
+          if (paragraphItems.length === 0) {
+            setContent('No content found for this paper.');
+          } else {
+            setContent('');
+          }
         }
       } catch (error) {
         console.error('Error fetching content:', error);
         setError(`Error loading content: ${error instanceof Error ? error.message : String(error)}`);
         setContent('');
         setParagraphs([]);
+        setSections([]);
       } finally {
         setLoading(false);
       }
@@ -118,6 +191,38 @@ const ReadingArea: React.FC<ReadingAreaProps> = ({
 
     fetchContent();
   }, [selectedPaper, selectedSection]);
+  
+  // Click away listener for section dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        sectionDropdownRef.current && 
+        !sectionDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsSectionDropdownOpen(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+  
+  // Copy to clipboard functionality
+  const handleCopyToClipboard = () => {
+    const selection = window.getSelection();
+    if (selection && selection.toString().length > 0) {
+      navigator.clipboard.writeText(selection.toString())
+        .then(() => {
+          setShowCopyToast(true);
+          setTimeout(() => setShowCopyToast(false), 2000);
+        })
+        .catch(err => {
+          console.error('Failed to copy text:', err);
+        });
+    }
+  };
   
   // Effect to scroll to the specified paragraph when it's available
   useEffect(() => {
@@ -134,8 +239,8 @@ const ReadingArea: React.FC<ReadingAreaProps> = ({
             const header = document.querySelector('header');
             const headerHeight = header ? header.offsetHeight : 60; // Default if header not found
             
-            // Calculate scroll position with increased offset (from 16px to 40px)
-            const offset = headerHeight + 40; // Increased padding from default 16px
+            // Account for sticky headers (about 100px total)
+            const offset = headerHeight + 100; 
             
             // Use scrollTo instead of scrollIntoView for more control
             window.scrollTo({
@@ -153,6 +258,31 @@ const ReadingArea: React.FC<ReadingAreaProps> = ({
       }
     }
   }, [paragraphNumber, paragraphs]);
+  
+  // Jump to section
+  const handleJumpToSection = (sectionId: string) => {
+    setIsSectionDropdownOpen(false);
+    
+    const targetSection = sections.find(section => section.id === sectionId);
+    if (!targetSection) return;
+    
+    const targetElement = document.getElementById(sectionId);
+    if (!targetElement) return;
+    
+    // Calculate offset for sticky headers
+    const header = document.querySelector('header');
+    const headerHeight = header ? header.offsetHeight : 60;
+    const offset = headerHeight + 100; // Additional space for sticky headers
+    
+    // Scroll to the section
+    window.scrollTo({
+      top: targetElement.offsetTop - offset,
+      behavior: 'smooth'
+    });
+    
+    // Update active section
+    setActiveSection(targetSection.title);
+  };
 
   // Get font classes based on theme
   const getFontFamilyClass = () => {
@@ -184,12 +314,20 @@ const ReadingArea: React.FC<ReadingAreaProps> = ({
     }
   };
 
-  // Determine if we're using modern or traditional theme
-  // Since we don't have this in ThemeContext, default to modern for sans-serif
-  const isModernTheme = theme.fontFamily === 'sans';
+  // Determine theme class
+  let themeClass = 'dark-theme';
+  if (theme.colorScheme === 'light') {
+    themeClass = 'light-theme';
+  } else if (theme.colorScheme === 'sepia') {
+    themeClass = 'sepia-theme';
+  }
 
   if (loading) {
-    return <div className="p-4 text-gray-700 dark:text-gray-300">Loading content...</div>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
   }
 
   if (error) {
@@ -197,49 +335,109 @@ const ReadingArea: React.FC<ReadingAreaProps> = ({
   }
 
   return (
-    <div
-      className={`
-      ${getFontFamilyClass()} 
-      ${getFontSizeClass()} 
-      ${getLineSpacingClass()} 
-      ${getMarginWidthClass()} 
-      p-4 transition-colors duration-300 max-w-4xl mx-auto
-      ${isModernTheme ? 'modern-theme' : 'traditional-theme'}
-    `}
-    >
-      <div className="text-center">
-        <h2 className={`font-bold mb-6 inline-block ${getFontSizeClass() === 'text-sm' ? 'text-lg' : getFontSizeClass() === 'text-base' ? 'text-xl' : getFontSizeClass() === 'text-lg' ? 'text-2xl' : getFontSizeClass() === 'text-xl' ? 'text-3xl' : 'text-4xl'}`}>
-          {selectedPaper}
-        </h2>
+    <div className={`app-container ${themeClass}`}>
+      <div className="reading-area" ref={readingAreaRef}>
+        <div className="content">
+          {/* Sticky Headers */}
+          <div className="sticky-header">
+            <div className="sticky-part-title">{activePart}</div>
+            <div className="sticky-paper-title">{selectedPaper}</div>
+          </div>
+
+          {/* Sticky Section Title and Jump Menu */}
+          <div className="sticky-section-title">
+            {activeSection || (sections[0]?.title ?? 'Introduction')}
+          </div>
+          
+          {sections.length > 1 && (
+            <div className="section-navigation" ref={sectionDropdownRef}>
+              <button 
+                className="section-dropdown-button"
+                onClick={() => setIsSectionDropdownOpen(!isSectionDropdownOpen)}
+              >
+                Jump to Section
+              </button>
+              <div className={`section-dropdown-content ${isSectionDropdownOpen ? 'show' : ''}`}>
+                {sections.map(section => (
+                  <a 
+                    key={section.id}
+                    href={`#${section.id}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleJumpToSection(section.id);
+                    }}
+                  >
+                    {section.number}. {section.title.replace(/^\d+\.\s*/i, '')}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Paper Title */}
+          <h2 className="paper-title">
+            PAPER {selectedPaper.match(/\d+/)?.[0] || ''}<br />
+            {selectedPaper.replace(/^Paper \d+:\s*/i, '')}
+          </h2>
+
+          {/* Sections and Paragraphs */}
+          {sections.map((section) => {
+            // Get paragraphs for this section
+            const sectionParagraphs = paragraphs.filter(p => 
+              p.id.includes(`-${section.number}-`)
+            );
+            
+            return (
+              <div key={section.id} id={section.id} className="section-content">
+                <h3 className="section-title">
+                  {section.number}. {section.title.replace(/^\d+\.\s*/i, '')}
+                </h3>
+                
+                {sectionParagraphs.map((paragraph) => (
+                  <div key={paragraph.id} id={paragraph.id} className="paragraph">
+                    <span className="paragraph-number">{paragraph.number}</span>
+                    <div className="paragraph-text">{paragraph.text}</div>
+                  </div>
+                ))}
+              </div>
+            );
+          })}
+          
+          {/* If no sections but paragraphs exist (for introduction) */}
+          {sections.length === 0 && paragraphs.length > 0 && (
+            <div className="section-content">
+              {paragraphs.map((paragraph) => (
+                <div key={paragraph.id} id={paragraph.id} className="paragraph">
+                  <span className="paragraph-number">{paragraph.number}</span>
+                  <div className="paragraph-text">{paragraph.text}</div>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          {/* Show content if no paragraphs */}
+          {paragraphs.length === 0 && content && (
+            <div className="mt-4">{content}</div>
+          )}
+        </div>
       </div>
       
-      {selectedSection && (
-        <div className={selectedSection.match(/^\d+\./) ? '' : 'text-center'}>
-          <h3 className={`font-semibold mb-6 inline-block ${getFontSizeClass() === 'text-sm' ? 'text-base' : getFontSizeClass() === 'text-base' ? 'text-lg' : getFontSizeClass() === 'text-lg' ? 'text-xl' : getFontSizeClass() === 'text-xl' ? 'text-2xl' : 'text-3xl'}`}>
-            {selectedSection}
-          </h3>
-        </div>
-      )}
+      {/* Copy Button */}
+      <button 
+        className="copy-button"
+        onClick={handleCopyToClipboard}
+        title="Copy selected text"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+      </button>
       
-      {paragraphs.length > 0 ? (
-        <div className={`${isModernTheme ? 'modern-paragraph' : 'traditional-paragraph'}`}>
-          {paragraphs.map((paragraph, index) => (
-            <p 
-              key={paragraph.id} 
-              id={paragraph.id}
-              className="mb-4 transition-colors duration-300"
-            >
-              {paragraph.text}
-            </p>
-          ))}
-        </div>
-      ) : (
-        <div className={`whitespace-pre-line ${isModernTheme ? 'modern-paragraph' : 'traditional-paragraph'}`}>
-          {content || 'Select a paper from the sidebar to begin reading.'}
-        </div>
-      )}
-      
-      {/* Debug information removed for production */}
+      {/* Toast Notification */}
+      <div className="toast" style={{ display: showCopyToast ? 'block' : 'none' }}>
+        Text copied to clipboard!
+      </div>
     </div>
   );
 };

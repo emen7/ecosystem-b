@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
-import Link from 'next/link';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -13,156 +12,164 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onSelectPaper, onSelectSection }) => {
   const { theme } = useTheme();
-  const [expandedPaper, setExpandedPaper] = useState<string | null>(null);
-
-  // For demonstration purposes, I'm creating mock papers and sections
-  // In a real implementation, these would likely be fetched from an API
-  const papers = Array.from({ length: 196 }, (_, i) => `Paper ${i + 1}`);
-
-  // Mock function to get sections for a paper
-  const getSectionsForPaper = (paper: string) => {
-    const paperNum = parseInt(paper.replace('Paper ', ''));
-    return Array.from({ length: 8 }, (_, i) => `Section ${i + 1}`);
-  };
-
-  const handlePaperClick = (paper: string) => {
-    if (expandedPaper === paper) {
-      setExpandedPaper(null);
-    } else {
-      setExpandedPaper(paper);
+  const [expandedPart, setExpandedPart] = useState<string>('part1'); // Part I expanded by default
+  
+  // Parts data
+  const parts = [
+    { 
+      id: 'part1', 
+      title: 'PART I. THE CENTRAL AND SUPERUNIVERSES',
+      papers: Array.from({ length: 31 }, (_, i) => ({ 
+        id: i + 1, 
+        title: `Paper ${i + 1}${i === 0 ? ': The Universal Father' : ''}` 
+      }))
+    },
+    { 
+      id: 'part2', 
+      title: 'PART II. THE LOCAL UNIVERSE',
+      papers: Array.from({ length: 25 }, (_, i) => ({ 
+        id: i + 32, 
+        title: `Paper ${i + 32}` 
+      }))
+    },
+    { 
+      id: 'part3', 
+      title: 'PART III. THE HISTORY OF URANTIA',
+      papers: Array.from({ length: 63 }, (_, i) => ({ 
+        id: i + 57, 
+        title: `Paper ${i + 57}` 
+      }))
+    },
+    { 
+      id: 'part4', 
+      title: 'PART IV. THE LIFE AND TEACHINGS OF JESUS',
+      papers: Array.from({ length: 77 }, (_, i) => ({ 
+        id: i + 120, 
+        title: `Paper ${i + 120}` 
+      }))
     }
-    onSelectPaper(paper);
-    onSelectSection('');
+  ];
+  
+  // Active paper
+  const [activePaper, setActivePaper] = useState<number>(1);
+
+  const handlePartToggle = (partId: string) => {
+    if (expandedPart === partId) {
+      // If clicking the already expanded part, do nothing
+      return;
+    }
+    setExpandedPart(partId);
   };
 
-  const handleSectionClick = (paper: string, section: string) => {
-    onSelectPaper(paper);
-    onSelectSection(section);
-    onClose(); // Close sidebar after selection on mobile
+  const handlePaperClick = (paperId: number, paperTitle: string) => {
+    setActivePaper(paperId);
+    onSelectPaper(paperTitle);
+    onSelectSection('');
+    
+    // Close sidebar on mobile
+    if (window.innerWidth < 768) {
+      onClose();
+    }
   };
 
   return (
-    <>
-      {/* Desktop sidebar - always visible on larger screens */}
-      <div className="hidden md:block md:w-64 lg:w-72 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 fixed top-16 bottom-0 left-0 overflow-y-auto z-30">
-        <div className="p-4">
-          <h2 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">Papers</h2>
+    <nav className={`navigation-menu ${isOpen ? 'open' : ''}`}>
+      {/* Fixed top container for active part */}
+      <div className="nav-fixed-top" id="active-parts-container">
+        {parts.map(part => {
+          const isActive = expandedPart === part.id;
           
-          <div className="space-y-1">
-            {papers.map((paper) => (
-              <div key={paper} className="mb-2">
-                <button
-                  className={`w-full flex items-center justify-between p-2 text-left rounded-md ${
-                    expandedPaper === paper
-                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                      : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-                  }`}
-                  onClick={() => handlePaperClick(paper)}
+          if (isActive) {
+            return (
+              <React.Fragment key={part.id}>
+                <button 
+                  className={`part-toggle active expanded`} 
+                  data-part={part.id}
+                  onClick={() => handlePartToggle(part.id)}
                 >
-                  <span>{paper}</span>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className={`h-5 w-5 transform ${expandedPaper === paper ? 'rotate-180' : ''}`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
+                  {part.title}
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
-                
-                {expandedPaper === paper && (
-                  <div className="pl-4 mt-1 space-y-1">
-                    {getSectionsForPaper(paper).map((section) => (
-                      <button
-                        key={section}
-                        className="w-full p-2 text-left rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400"
-                        onClick={() => handleSectionClick(paper, section)}
-                      >
-                        {section}
-                      </button>
+                <div className={`part-content expanded`} id={`${part.id}-content`}>
+                  <ul className="nav-list">
+                    {part.papers.map(paper => (
+                      <li key={paper.id}>
+                        <a 
+                          href="#" 
+                          className={activePaper === paper.id ? 'active' : ''}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handlePaperClick(paper.id, paper.title);
+                          }}
+                        >
+                          {paper.title}
+                        </a>
+                      </li>
                     ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile sidebar - slides in from the left */}
-      <div
-        className={`md:hidden fixed inset-y-0 left-0 w-72 bg-white dark:bg-gray-800 shadow-lg transform ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        } transition-transform duration-300 ease-in-out z-40 overflow-y-auto pt-16`}
-      >
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Papers</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path
-                fillRule="evenodd"
-                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </button>
-        </div>
-
-        <div className="p-4 space-y-2 overflow-y-auto">
-          {papers.map((paper) => (
-            <div key={paper} className="mb-2">
-              <button
-                className={`w-full flex items-center justify-between p-2 text-left rounded-md ${
-                  expandedPaper === paper
-                    ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
-                    : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-                }`}
-                onClick={() => handlePaperClick(paper)}
-              >
-                <span>{paper}</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className={`h-5 w-5 transform ${expandedPaper === paper ? 'rotate-180' : ''}`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </button>
-              
-              {expandedPaper === paper && (
-                <div className="pl-4 mt-1 space-y-1">
-                  {getSectionsForPaper(paper).map((section) => (
-                    <button
-                      key={section}
-                      className="w-full p-2 text-left rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400"
-                      onClick={() => handleSectionClick(paper, section)}
-                    >
-                      {section}
-                    </button>
-                  ))}
+                  </ul>
                 </div>
-              )}
-            </div>
-          ))}
-        </div>
+              </React.Fragment>
+            );
+          }
+          return null;
+        })}
       </div>
-    </>
+
+      {/* Scrollable middle section */}
+      <div className="nav-scrollable" id="papers-container">
+        {/* Papers are shown in the active part section above */}
+      </div>
+
+      {/* Fixed bottom container for inactive parts */}
+      <div className="nav-fixed-bottom" id="inactive-parts-container">
+        {parts.map(part => {
+          const isInactive = expandedPart !== part.id;
+          
+          if (isInactive) {
+            return (
+              <React.Fragment key={part.id}>
+                <button 
+                  className="part-toggle" 
+                  data-part={part.id}
+                  onClick={() => handlePartToggle(part.id)}
+                >
+                  {part.title}
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                <div className="part-content" id={`${part.id}-content`}>
+                  <ul className="nav-list">
+                    {part.papers.map(paper => (
+                      <li key={paper.id}>
+                        <a 
+                          href="#" 
+                          className={activePaper === paper.id ? 'active' : ''}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handlePaperClick(paper.id, paper.title);
+                          }}
+                        >
+                          {paper.title}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </React.Fragment>
+            );
+          }
+          return null;
+        })}
+      </div>
+      
+      {/* Overlay for mobile - add it outside the navigation menu */}
+      {isOpen && (
+        <div className="overlay active" onClick={onClose}></div>
+      )}
+    </nav>
   );
 };
 

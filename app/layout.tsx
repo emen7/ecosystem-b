@@ -1,6 +1,7 @@
 import './globals.css';
 import './enhanced-ui.css';
 import './ui-fixes.css';
+import './components/panels.css';
 import React from 'react';
 import type { Metadata } from 'next';
 import ClientThemeLayout from './components/ClientThemeLayout';

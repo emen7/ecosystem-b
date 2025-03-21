@@ -1,0 +1,211 @@
+/* Navigation menu styles */
+.navigation-menu {
+  position: fixed;
+  top: 56px;
+  left: 0;
+  bottom: 0;
+  width: 300px;
+  background-color: var(--background-color, #2d3748);
+  border-right: 1px solid var(--border-color, #4a5568);
+  z-index: 40;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.navigation-menu.open {
+  transform: translateX(0);
+}
+
+/* Fixed top and bottom containers for part toggles */
+.nav-fixed-top,
+.nav-fixed-bottom {
+  background-color: var(--background-color, #2d3748);
+  border-bottom: 1px solid var(--border-color, #4a5568);
+}
+
+.nav-fixed-bottom {
+  margin-top: auto; /* Push to bottom */
+  border-top: 1px solid var(--border-color, #4a5568);
+  border-bottom: none;
+}
+
+.nav-scrollable {
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+/* Part title toggles */
+.part-toggle {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--secondary-text, #a0aec0);
+  background-color: var(--background-color, #2d3748);
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color 0.2s;
+}
+
+.part-toggle:hover {
+  background-color: var(--hover-color, #4a5568);
+}
+
+.part-toggle.active {
+  color: var(--text-color, #e2e8f0);
+}
+
+.part-toggle svg {
+  transition: transform 0.2s;
+}
+
+.part-toggle.expanded svg {
+  transform: rotate(180deg);
+}
+
+/* Paper list styles */
+.part-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.part-content.expanded {
+  max-height: 500px; /* Arbitrary large value, will be constrained by content */
+}
+
+.nav-list {
+  list-style: none;
+  padding: 0 0 0 0.75rem;
+  margin: 0.25rem 0;
+}
+
+.nav-list li {
+  margin-bottom: 0.2rem;
+}
+
+.nav-list li a {
+  color: var(--text-color, #e2e8f0);
+  text-decoration: none;
+  display: block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s;
+  font-size: 0.8rem;
+}
+
+.nav-list li a:hover {
+  background-color: var(--hover-color, #4a5568);
+}
+
+.nav-list li a.active {
+  background-color: var(--active-color, #4299e1);
+  color: white;
+}
+
+/* Overlay */
+.overlay {
+  position: fixed;
+  top: 56px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 30;
+  display: none;
+}
+
+.overlay.active {
+  display: block;
+}
+
+/* Settings panel styles */
+.settings-panel {
+  position: fixed;
+  top: 56px;
+  right: 0;
+  bottom: 0;
+  width: 300px;
+  background-color: var(--background-color, #2d3748);
+  border-left: 1px solid var(--border-color, #4a5568);
+  z-index: 40;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  overflow-y: auto;
+}
+
+.settings-panel.open {
+  transform: translateX(0);
+}
+
+.settings-section {
+  border-bottom: 1px solid var(--border-color, #4a5568);
+  padding: 1rem;
+}
+
+.settings-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-color, #e2e8f0);
+  margin-bottom: 1rem;
+}
+
+.settings-option {
+  margin-bottom: 1rem;
+}
+
+.settings-option-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--secondary-text, #a0aec0);
+  margin-bottom: 0.5rem;
+}
+
+.settings-option-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.settings-option-button {
+  padding: 0.3rem 0.5rem;
+  background-color: var(--hover-color, #4a5568);
+  color: var(--text-color, #e2e8f0);
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 0.875rem;
+}
+
+.settings-option-button:hover {
+  background-color: var(--active-color, #4299e1);
+}
+
+.settings-option-button.active {
+  background-color: var(--active-color, #4299e1);
+  color: white;
+}
+
+/* Header button styles */
+.header-button {
+  background: none;
+  border: none;
+  color: var(--secondary-text, #a0aec0);
+  padding: 0.5rem;
+  cursor: pointer;
+  border-radius: 0.25rem;
+  transition: color 0.2s, background-color 0.2s;
+}
+
+.header-button:hover {
+  color: var(--text-color, #e2e8f0);
+  background-color: var(--hover-color, #4a5568);
+}

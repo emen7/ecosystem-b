@@ -14,19 +14,19 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onSelectPaper, onSel
   const { theme } = useTheme();
   const [expandedPart, setExpandedPart] = useState<string>('part1'); // Part I expanded by default
   
-  // Parts data
-  const parts = [
-    { 
-      id: 'part1', 
-      title: 'PART I. THE CENTRAL AND SUPERUNIVERSES',
-      papers: [
-        { id: 0, title: 'Paper 0: Foreword' },
-        ...Array.from({ length: 31 }, (_, i) => ({ 
-          id: i + 1, 
-          title: `Paper ${i + 1}${i === 0 ? ': The Universal Father' : ''}` 
-        }))
-      ]
-    },
+// Parts data
+const parts = [
+  { 
+    id: 'part1', 
+    title: 'PART I. THE CENTRAL AND SUPERUNIVERSES',
+    papers: [
+      { id: 0, title: 'Foreword' }, // Changed from "Paper 0: Foreword" to just "Foreword"
+      ...Array.from({ length: 31 }, (_, i) => ({ 
+        id: i + 1, 
+        title: `Paper ${i + 1}${i === 0 ? ': The Universal Father' : ''}` 
+      }))
+    ]
+  },
     { 
       id: 'part2', 
       title: 'PART II. THE LOCAL UNIVERSE',

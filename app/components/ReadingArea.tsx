@@ -120,69 +120,83 @@ const ReadingArea: React.FC<ReadingAreaProps> = ({
             // Set active section
             setActiveSection(selectedSection);
             
-            // Process paragraphs for the section
-            const paragraphItems = data.filter((item: any) => 
-              item.type === "paragraph" && 
-              item.paperSectionId === `${paperNumber}.${sectionNumber}`
-            );
-            
-            setParagraphs(paragraphItems.map((item: any, index: number) => ({
-              id: `p-${paperNumber}-${sectionNumber}-${index + 1}`,
-              number: index + 1,
-              text: item.text
-            })));
-            
-            // If no paragraphs found, display message
-            if (paragraphItems.length === 0) {
-              setContent('No content found for this section.');
-            } else {
-              setContent('');
-            }
+  // Process paragraphs for the section
+  const paragraphItems = data.filter((item: any) => 
+    item.type === "paragraph" && 
+    item.paperSectionId === `${paperNumber}.${sectionNumber}`
+  );
+  
+  setParagraphs(paragraphItems.map((item: any, index: number) => ({
+    id: `p-${paperNumber}-${sectionNumber}-${index + 1}`,
+    number: index + 1,
+    text: item.text
+  })));
+  
+  // If no paragraphs found, display message
+  if (paragraphItems.length === 0) {
+    setContent('No content found for this section.');
+  } else {
+    setContent('');
+  }
           } else {
             setContent('Invalid section selection.');
             setParagraphs([]);
           }
         } else {
-          // If no section is selected, show all paragraphs
-          const paragraphItems = data.filter((item: any) => item.type === "paragraph");
-          
-          // Group paragraphs by section
-          const groupedParagraphs: Record<string, any[]> = {};
-          
-          paragraphItems.forEach((item: any) => {
-            const sectionId = item.paperSectionId?.split('.')[1] || '0';
-            if (!groupedParagraphs[sectionId]) {
-              groupedParagraphs[sectionId] = [];
-            }
-            groupedParagraphs[sectionId].push(item);
-          });
-          
-          // Flatten and add paragraph numbers
-          const allParagraphs: {id: string, number: number, text: string}[] = [];
-          
-          Object.entries(groupedParagraphs).forEach(([sectionId, sectionParagraphs]) => {
-            sectionParagraphs.forEach((item, index) => {
-              allParagraphs.push({
-                id: `p-${paperNumber}-${sectionId}-${index + 1}`,
-                number: index + 1,
-                text: item.text
-              });
-            });
-          });
-          
-          setParagraphs(allParagraphs);
-          
-          // Use first section as active if available
-          if (sections.length > 0) {
-            setActiveSection(sections[0].title);
-          }
-          
-          // If no paragraphs found, display message
-          if (paragraphItems.length === 0) {
-            setContent('No content found for this paper.');
-          } else {
-            setContent('');
-          }
+// If no section is selected, show all paragraphs
+const paragraphItems = data.filter((item: any) => item.type === "paragraph");
+
+// Group paragraphs by section
+const groupedParagraphs: Record<string, any[]> = {};
+
+paragraphItems.forEach((item: any) => {
+  const sectionId = item.paperSectionId?.split('.')[1] || '0';
+  if (!groupedParagraphs[sectionId]) {
+    groupedParagraphs[sectionId] = [];
+  }
+  groupedParagraphs[sectionId].push(item);
+});
+
+// Extract section titles including introduction (section 0)
+const allSections = data.filter((item: any) => 
+  item.type === "section_title" || 
+  (item.type === "section" && item.sectionId === "0")
+).map((item: any) => {
+  const sectionId = item.paperSectionId?.split('.')[1] || "0";
+  return {
+    id: `section-${sectionId}`,
+    number: sectionId,
+    title: item.sectionTitle || (sectionId === "0" ? "Introduction" : item.text || "")
+  };
+});
+setSections(allSections);
+
+// Flatten and add paragraph numbers
+const allParagraphs: {id: string, number: number, text: string}[] = [];
+
+Object.entries(groupedParagraphs).forEach(([sectionId, sectionParagraphs]) => {
+  sectionParagraphs.forEach((item, index) => {
+    allParagraphs.push({
+      id: `p-${paperNumber}-${sectionId}-${index + 1}`,
+      number: index + 1,
+      text: item.text
+    });
+  });
+});
+
+setParagraphs(allParagraphs);
+
+// Use first section as active if available
+if (sections.length > 0) {
+  setActiveSection(sections[0].title || "Introduction");
+}
+
+// If no paragraphs found, display message
+if (paragraphItems.length === 0) {
+  setContent('No content found for this paper.');
+} else {
+  setContent('');
+}
         }
       } catch (error) {
         console.error('Error fetching content:', error);
@@ -386,40 +400,47 @@ const ReadingArea: React.FC<ReadingAreaProps> = ({
             {selectedPaper.replace(/^Paper \d+:\s*/i, '')}
           </h2>
 
-          {/* Sections and Paragraphs */}
-          {sections.map((section) => {
-            // Get paragraphs for this section
-            const sectionParagraphs = paragraphs.filter(p => 
-              p.id.includes(`-${section.number}-`)
-            );
+      {/* Sections and Paragraphs */}
+      {sections.map((section) => {
+        // Get paragraphs for this section
+        const sectionParagraphs = paragraphs.filter(p => 
+          p.id.includes(`-${section.number}-`)
+        );
+        
+        return (
+          <div key={section.id} id={section.id} className="section-content">
+            {section.number !== "0" ? (
+              <h3 className="section-title">
+                {section.number}. {section.title.replace(/^\d+\.\s*/i, '')}
+              </h3>
+            ) : (
+              // This is the introduction section (no number)
+              <h3 className="section-title-intro">
+                {selectedPaper === "Foreword" ? "" : "Introduction"}
+              </h3>
+            )}
             
-            return (
-              <div key={section.id} id={section.id} className="section-content">
-                <h3 className="section-title">
-                  {section.number}. {section.title.replace(/^\d+\.\s*/i, '')}
-                </h3>
-                
-                {sectionParagraphs.map((paragraph) => (
-                  <div key={paragraph.id} id={paragraph.id} className="paragraph">
-                    <span className="paragraph-number">{paragraph.number}</span>
-                    <div className="paragraph-text">{paragraph.text}</div>
-                  </div>
-                ))}
+            {sectionParagraphs.map((paragraph) => (
+              <div key={paragraph.id} id={paragraph.id} className="paragraph">
+                <span className="paragraph-number">{paragraph.number}</span>
+                <div className="paragraph-text">{paragraph.text}</div>
               </div>
-            );
-          })}
-          
-          {/* If no sections but paragraphs exist (for introduction) */}
-          {sections.length === 0 && paragraphs.length > 0 && (
-            <div className="section-content">
-              {paragraphs.map((paragraph) => (
-                <div key={paragraph.id} id={paragraph.id} className="paragraph">
-                  <span className="paragraph-number">{paragraph.number}</span>
-                  <div className="paragraph-text">{paragraph.text}</div>
-                </div>
-              ))}
+            ))}
+          </div>
+        );
+      })}
+      
+      {/* If no sections but paragraphs exist (fallback) */}
+      {sections.length === 0 && paragraphs.length > 0 && (
+        <div className="section-content">
+          {paragraphs.map((paragraph) => (
+            <div key={paragraph.id} id={paragraph.id} className="paragraph">
+              <span className="paragraph-number">{paragraph.number}</span>
+              <div className="paragraph-text">{paragraph.text}</div>
             </div>
-          )}
+          ))}
+        </div>
+      )}
           
           {/* Show content if no paragraphs */}
           {paragraphs.length === 0 && content && (

@@ -67,16 +67,22 @@ const ReadingArea: React.FC<ReadingAreaProps> = ({
           return;
         }
         
-        // Extract the paper number and pad it with zeros
-        const paperMatch = selectedPaper.match(/\d+/);
-        const paperNumber = paperMatch ? paperMatch[0].padStart(3, '0') : null;
-        
-        if (!paperNumber) {
-          setContent('Invalid paper selection.');
-          setParagraphs([]);
-          setSections([]);
-          setLoading(false);
-          return;
+        // Handle the Foreword specifically
+        let paperNumber;
+        if (selectedPaper === "Foreword") {
+          paperNumber = "000";
+        } else {
+          // Extract the paper number and pad it with zeros
+          const paperMatch = selectedPaper.match(/\d+/);
+          paperNumber = paperMatch ? paperMatch[0].padStart(3, '0') : null;
+          
+          if (!paperNumber) {
+            setContent('Invalid paper selection.');
+            setParagraphs([]);
+            setSections([]);
+            setLoading(false);
+            return;
+          }
         }
         
         console.log(`Fetching paper: ${paperNumber}`);

@@ -19,10 +19,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onSelectPaper, onSel
     { 
       id: 'part1', 
       title: 'PART I. THE CENTRAL AND SUPERUNIVERSES',
-      papers: Array.from({ length: 31 }, (_, i) => ({ 
-        id: i + 1, 
-        title: `Paper ${i + 1}${i === 0 ? ': The Universal Father' : ''}` 
-      }))
+      papers: [
+        { id: 0, title: 'Paper 0: Foreword' },
+        ...Array.from({ length: 31 }, (_, i) => ({ 
+          id: i + 1, 
+          title: `Paper ${i + 1}${i === 0 ? ': The Universal Father' : ''}` 
+        }))
+      ]
     },
     { 
       id: 'part2', 
@@ -63,7 +66,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, onSelectPaper, onSel
 
   const handlePaperClick = (paperId: number, paperTitle: string) => {
     setActivePaper(paperId);
-    onSelectPaper(paperTitle);
+    
+    // Special handling for the Foreword (Paper 0)
+    if (paperId === 0) {
+      onSelectPaper("Foreword");
+    } else {
+      onSelectPaper(paperTitle);
+    }
+    
     onSelectSection('');
     
     // Close sidebar on mobile

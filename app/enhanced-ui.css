@@ -10,8 +10,8 @@
 /* Sticky header styles */
 .sticky-header {
   position: sticky;
-  top: 0;
-  z-index: 10;
+  top: 56px; /* Fixed header height */
+  z-index: 20;
   background-color: var(--background-color, #1a202c);
   padding: 0.5rem 0;
   border-bottom: 1px solid var(--border-color, #4a5568);
@@ -39,10 +39,10 @@
 
 .sticky-section-title {
   position: sticky;
-  top: 64px; /* Height of the sticky header + padding */
+  top: 120px; /* Header + sticky header height */
   padding: 0.5rem 0;
   background-color: var(--background-color, #1a202c);
-  z-index: 9;
+  z-index: 19;
   border-bottom: 1px solid var(--border-color, #4a5568);
   font-size: 0.875rem;
   font-weight: 600;
@@ -206,30 +206,50 @@
   display: none;
 }
 
-/* Dark/Light/Sepia themes */
+/* Section navigation dropdown - match z-index */
+.section-dropdown-content {
+  z-index: 25;
+}
+
+/* Content container spacing */
+.content-container {
+  padding-top: 56px; /* Match header height */
+}
+
+/* Header styling */
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  height: 56px;
+  background-color: var(--background-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Dark/Light themes with modern colors */
 .dark-theme {
-  --background-color: #1a202c;
-  --text-color: #f7fafc;
-  --secondary-text: #a0aec0;
-  --border-color: #2d3748;
-  --hover-color: #2d3748;
-  --active-color: #3182ce;
+  --background-color: #000000; /* True black for OLED screens */
+  --text-color: #ffffff;
+  --secondary-text: #b5bfd3;
+  --border-color: #2d333b;
+  --hover-color: #2d333b;
+  --active-color: #0078d7; /* Modern blue accent */
 }
 
 .light-theme {
   --background-color: #ffffff;
-  --text-color: #1a202c;
-  --secondary-text: #4a5568;
-  --border-color: #e2e8f0;
-  --hover-color: #edf2f7;
-  --active-color: #3182ce;
+  --text-color: #0f172a; /* Deep blue-black for better contrast */
+  --secondary-text: #4b5563;
+  --border-color: #e5e7eb;
+  --hover-color: #f3f4f6;
+  --active-color: #0078d7; /* Modern blue accent */
 }
 
-.sepia-theme {
-  --background-color: #f8f1e3;
-  --text-color: #4b3621;
-  --secondary-text: #5f4c32;
-  --border-color: #e6d7bf;
-  --hover-color: #f0e5d1;
-  --active-color: #957746;
+/* System theme icon style */
+.system-theme-icon {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 4px;
 }

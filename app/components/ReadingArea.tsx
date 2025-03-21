@@ -14,7 +14,7 @@ const ReadingArea: React.FC<ReadingAreaProps> = ({
   selectedSection,
   paragraphNumber 
 }) => {
-  const { theme } = useTheme();
+  const { theme, effectiveColorScheme } = useTheme();
   
   // State
   const [content, setContent] = useState('');
@@ -334,13 +334,8 @@ if (paragraphItems.length === 0) {
     }
   };
 
-  // Determine theme class
-  let themeClass = 'dark-theme';
-  if (theme.colorScheme === 'light') {
-    themeClass = 'light-theme';
-  } else if (theme.colorScheme === 'sepia') {
-    themeClass = 'sepia-theme';
-  }
+  // Determine theme class based on effective color scheme
+  const themeClass = effectiveColorScheme === 'light' ? 'light-theme' : 'dark-theme';
 
   if (loading) {
     return (
@@ -409,14 +404,10 @@ if (paragraphItems.length === 0) {
         
         return (
           <div key={section.id} id={section.id} className="section-content">
-            {section.number !== "0" ? (
+            {/* Only render section title if it's not section 0 (introduction) */}
+            {section.number !== "0" && (
               <h3 className="section-title">
                 {section.number}. {section.title.replace(/^\d+\.\s*/i, '')}
-              </h3>
-            ) : (
-              // This is the introduction section (no number)
-              <h3 className="section-title-intro">
-                {selectedPaper === "Foreword" ? "" : "Introduction"}
               </h3>
             )}
             

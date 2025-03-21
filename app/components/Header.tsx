@@ -12,7 +12,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuToggle, onSettingsToggle }) => {
   const { theme } = useTheme();
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 shadow-md border-b border-gray-700 h-14">
+    <header className="fixed top-0 left-0 right-0 z-30 shadow-md border-b h-14 header">
       <div className="flex justify-between items-center h-full px-4">
         {/* Menu Button (Left) */}
         <button

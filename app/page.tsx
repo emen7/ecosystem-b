@@ -8,7 +8,7 @@ import SettingsPanel from "./components/SettingsPanel";
 import { useTheme } from "./contexts/ThemeContext";
 
 export default function Home() {
-  const { theme } = useTheme();
+  const { theme, effectiveColorScheme } = useTheme();
   const [selectedPaper, setSelectedPaper] = useState("Paper 1: The Universal Father");
   const [selectedSection, setSelectedSection] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -24,17 +24,26 @@ export default function Home() {
   
   // Apply theme class to body
   useEffect(() => {
-    document.body.classList.remove("dark-theme", "light-theme", "sepia-theme");
+    document.body.classList.remove("dark-theme", "light-theme");
     
-    let themeClass = "dark-theme"; 
-    if (theme.colorScheme === "light") {
-      themeClass = "light-theme";
-    } else if (theme.colorScheme === "sepia") {
-      themeClass = "sepia-theme";
-    }
-    
+    const themeClass = effectiveColorScheme === 'light' ? 'light-theme' : 'dark-theme';
     document.body.classList.add(themeClass);
-  }, [theme.colorScheme]);
+    
+    // Add custom CSS variables to body for font and spacing settings
+    document.body.style.setProperty('--font-family', theme.fontFamily === 'serif' ? 
+      "'Georgia', 'Times New Roman', serif" : 
+      "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif");
+      
+    document.body.style.setProperty('--font-size', 
+      theme.fontSize === 'small' ? '0.9rem' : 
+      theme.fontSize === 'large' ? '1.1rem' : 
+      theme.fontSize === 'xlarge' ? '1.25rem' : '1rem');
+      
+    document.body.style.setProperty('--line-height', 
+      theme.lineSpacing === 'compact' ? '1.4' :
+      theme.lineSpacing === 'relaxed' ? '1.8' : '1.6');
+      
+  }, [theme, effectiveColorScheme]);
   
   return (
     <div className="app-container">

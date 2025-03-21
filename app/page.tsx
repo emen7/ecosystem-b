@@ -1,28 +1,54 @@
 "use client";
 
-import React from "react";
-import { EnhancedThemeProvider } from "./contexts/EnhancedThemeContext";
-import HeaderWithMenu from "./components/ui/HeaderWithMenu";
-import EnhancedReadingArea from "./components/ui/EnhancedReadingArea";
+import React, { useState } from "react";
+import Header from "./components/Header";
+import ReadingArea from "./components/ReadingArea";
+import Sidebar from "./components/Sidebar";
+import SettingsPanel from "./components/SettingsPanel";
 
 export default function Home() {
-  // Default to showing Paper 1 in the enhanced UI
-  const paperTitle = "Paper 1: The Universal Father";
+  const [selectedPaper, setSelectedPaper] = useState("Paper 1: The Universal Father");
+  const [selectedSection, setSelectedSection] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  
+  const handleSelectPaper = (paper: string) => {
+    setSelectedPaper(paper);
+  };
+  
+  const handleSelectSection = (section: string) => {
+    setSelectedSection(section);
+  };
   
   return (
-    <EnhancedThemeProvider>
-      <div className="min-h-screen">
-        {/* Header with Navigation and Settings */}
-        <HeaderWithMenu />
+    <div className="min-h-screen">
+      {/* Header */}
+      <Header 
+        onMenuToggle={() => setSidebarOpen(!sidebarOpen)} 
+        onSettingsToggle={() => setSettingsOpen(!settingsOpen)} 
+      />
 
-        {/* Main Content */}
-        <main className="pt-14">
-          <EnhancedReadingArea
-            selectedPaper={paperTitle}
-            selectedSection=""
-          />
-        </main>
-      </div>
-    </EnhancedThemeProvider>
+      {/* Sidebar - Always pass isOpen prop */}
+      <Sidebar 
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        onSelectPaper={handleSelectPaper}
+        onSelectSection={handleSelectSection}
+      />
+      
+      {/* Settings Panel - Always pass isOpen prop */}
+      <SettingsPanel 
+        isOpen={settingsOpen}
+        onClose={() => setSettingsOpen(false)} 
+      />
+
+      {/* Main Content */}
+      <main className="pt-14">
+        <ReadingArea
+          selectedPaper={selectedPaper}
+          selectedSection={selectedSection}
+        />
+      </main>
+    </div>
   );
 }

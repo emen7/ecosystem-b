@@ -12,7 +12,7 @@
   position: sticky;
   top: 56px; /* Fixed header height */
   z-index: 20;
-  background-color: var(--background-color, #1a202c);
+  background-color: inherit;
   padding: 0.5rem 0;
   border-bottom: 1px solid var(--border-color, #4a5568);
   max-width: 800px;
@@ -41,7 +41,7 @@
   position: sticky;
   top: 120px; /* Header + sticky header height */
   padding: 0.5rem 0;
-  background-color: var(--background-color, #1a202c);
+  background-color: inherit;
   z-index: 19;
   border-bottom: 1px solid var(--border-color, #4a5568);
   font-size: 0.875rem;
@@ -230,7 +230,9 @@ header {
 
 /* Dark/Light themes with modern colors */
 .dark-theme {
-  --background-color: #000000; /* True black for OLED screens */
+  background-color: #000000; /* True black for OLED screens */
+  color: #ffffff;
+  --background-color: #000000;
   --text-color: #ffffff;
   --secondary-text: #b5bfd3;
   --border-color: #2d333b;
@@ -239,12 +241,34 @@ header {
 }
 
 .light-theme {
+  background-color: #ffffff;
+  color: #0f172a;
   --background-color: #ffffff;
   --text-color: #0f172a; /* Deep blue-black for better contrast */
   --secondary-text: #4b5563;
   --border-color: #e5e7eb;
   --hover-color: #f3f4f6;
   --active-color: #0078d7; /* Modern blue accent */
+}
+
+/* Ensure app container inherits theme background */
+.app-container {
+  background-color: inherit;
+}
+
+/* Fix for sticky headers - ensure they actually stick */
+.app-container,
+.reading-area,
+body,
+html {
+  height: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.reading-area {
+  padding-top: 0;
+  padding-bottom: 2rem;
 }
 
 /* System theme icon style */

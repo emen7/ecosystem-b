@@ -279,6 +279,64 @@ if (paragraphItems.length === 0) {
     }
   }, [paragraphNumber, paragraphs]);
   
+  // Add scroll detection to update the sticky section title
+  useEffect(() => {
+    const handleScroll = () => {
+      // Don't update if there are no sections
+      if (sections.length === 0) return;
+      
+      // Get all section elements in the DOM
+      const sectionElements = Array.from(document.querySelectorAll('.section-content'));
+      if (sectionElements.length === 0) return;
+      
+      // Find the section currently in view
+      let currentSectionEl = null;
+      let closestPosition = -Infinity;
+      
+      // Fixed header height plus buffer
+      const headerOffset = 150; 
+      
+      sectionElements.forEach(section => {
+        const rect = section.getBoundingClientRect();
+        // Look for sections that are near the top of the viewport but already scrolled past the header
+        if (rect.top <= headerOffset && rect.top > closestPosition) {
+          closestPosition = rect.top;
+          currentSectionEl = section;
+        }
+      });
+      
+      // If we found a section in view
+      if (currentSectionEl) {
+        const sectionId = currentSectionEl.id;
+        const section = sections.find(s => s.id === sectionId);
+        
+        if (section) {
+          // Only update if different from current active section
+          if (section.title !== activeSection) {
+            setActiveSection(section.title);
+          }
+        }
+      } else if (sectionElements.length > 0) {
+        // If no section is in view (likely at the top), use the first section
+        const firstSectionId = sectionElements[0].id;
+        const firstSection = sections.find(s => s.id === firstSectionId);
+        if (firstSection && firstSection.title !== activeSection) {
+          setActiveSection(firstSection.title);
+        }
+      }
+    };
+    
+    // Add scroll listener to window instead of reading area
+    window.addEventListener('scroll', handleScroll);
+    
+    // Initial check
+    setTimeout(handleScroll, 200); // Slight delay to ensure DOM is ready
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [sections, activeSection]);
+
   // Jump to section
   const handleJumpToSection = (sectionId: string) => {
     setIsSectionDropdownOpen(false);

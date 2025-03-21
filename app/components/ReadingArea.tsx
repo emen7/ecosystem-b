@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
-import '../ui-fixes.css'; // Import the UI fixes
 
 interface ReadingAreaProps {
   selectedPaper: string;
@@ -186,7 +185,7 @@ const ReadingArea: React.FC<ReadingAreaProps> = ({
   };
 
   // Determine if we're using modern or traditional theme
-  // Default to modern for sans-serif
+  // Since we don't have this in ThemeContext, default to modern for sans-serif
   const isModernTheme = theme.fontFamily === 'sans';
 
   if (loading) {
@@ -198,49 +197,49 @@ const ReadingArea: React.FC<ReadingAreaProps> = ({
   }
 
   return (
-    <div className="reading-content">
-      <div
-        className={`
-        ${getFontFamilyClass()} 
-        ${getFontSizeClass()} 
-        ${getLineSpacingClass()} 
-        ${getMarginWidthClass()} 
-        p-4 transition-colors duration-300
-        ${isModernTheme ? 'modern-theme' : 'traditional-theme'}
-      `}
-      >
-        <div className="text-center mb-8">
-          <h2 className={`font-bold mb-6 inline-block ${getFontSizeClass() === 'text-sm' ? 'text-lg' : getFontSizeClass() === 'text-base' ? 'text-xl' : getFontSizeClass() === 'text-lg' ? 'text-2xl' : getFontSizeClass() === 'text-xl' ? 'text-3xl' : 'text-4xl'}`}>
-            {selectedPaper}
-          </h2>
-        </div>
-        
-        {selectedSection && (
-          <div className={selectedSection.match(/^\d+\./) ? '' : 'text-center mb-6'}>
-            <h3 className={`font-semibold mb-6 inline-block ${getFontSizeClass() === 'text-sm' ? 'text-base' : getFontSizeClass() === 'text-base' ? 'text-lg' : getFontSizeClass() === 'text-lg' ? 'text-xl' : getFontSizeClass() === 'text-xl' ? 'text-2xl' : 'text-3xl'}`}>
-              {selectedSection}
-            </h3>
-          </div>
-        )}
-        
-        {paragraphs.length > 0 ? (
-          <div className={`${isModernTheme ? 'modern-paragraph' : 'traditional-paragraph'}`}>
-            {paragraphs.map((paragraph, index) => (
-              <p 
-                key={paragraph.id} 
-                id={paragraph.id}
-                className="mb-4 transition-colors duration-300"
-              >
-                {paragraph.text}
-              </p>
-            ))}
-          </div>
-        ) : (
-          <div className={`whitespace-pre-line ${isModernTheme ? 'modern-paragraph' : 'traditional-paragraph'}`}>
-            {content || 'Select a paper from the sidebar to begin reading.'}
-          </div>
-        )}
+    <div
+      className={`
+      ${getFontFamilyClass()} 
+      ${getFontSizeClass()} 
+      ${getLineSpacingClass()} 
+      ${getMarginWidthClass()} 
+      p-4 transition-colors duration-300 max-w-4xl mx-auto
+      ${isModernTheme ? 'modern-theme' : 'traditional-theme'}
+    `}
+    >
+      <div className="text-center">
+        <h2 className={`font-bold mb-6 inline-block ${getFontSizeClass() === 'text-sm' ? 'text-lg' : getFontSizeClass() === 'text-base' ? 'text-xl' : getFontSizeClass() === 'text-lg' ? 'text-2xl' : getFontSizeClass() === 'text-xl' ? 'text-3xl' : 'text-4xl'}`}>
+          {selectedPaper}
+        </h2>
       </div>
+      
+      {selectedSection && (
+        <div className={selectedSection.match(/^\d+\./) ? '' : 'text-center'}>
+          <h3 className={`font-semibold mb-6 inline-block ${getFontSizeClass() === 'text-sm' ? 'text-base' : getFontSizeClass() === 'text-base' ? 'text-lg' : getFontSizeClass() === 'text-lg' ? 'text-xl' : getFontSizeClass() === 'text-xl' ? 'text-2xl' : 'text-3xl'}`}>
+            {selectedSection}
+          </h3>
+        </div>
+      )}
+      
+      {paragraphs.length > 0 ? (
+        <div className={`${isModernTheme ? 'modern-paragraph' : 'traditional-paragraph'}`}>
+          {paragraphs.map((paragraph, index) => (
+            <p 
+              key={paragraph.id} 
+              id={paragraph.id}
+              className="mb-4 transition-colors duration-300"
+            >
+              {paragraph.text}
+            </p>
+          ))}
+        </div>
+      ) : (
+        <div className={`whitespace-pre-line ${isModernTheme ? 'modern-paragraph' : 'traditional-paragraph'}`}>
+          {content || 'Select a paper from the sidebar to begin reading.'}
+        </div>
+      )}
+      
+      {/* Debug information removed for production */}
     </div>
   );
 };

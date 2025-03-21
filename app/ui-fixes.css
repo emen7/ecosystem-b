@@ -5,6 +5,7 @@
 /* 
  * Increased scroll margins for section titles
  * This ensures section jumps position the section title properly below the header
+ * Increased from 120px to 150px to prevent jumps from landing beyond section title
  */
 .section-title,
 section[id^="section-"] h2,
@@ -136,33 +137,4 @@ h2[id^="title-paper-"] {
   h2[id^="title-section-"] {
     scroll-margin-top: 100px !important;
   }
-}
-
-/* Light/Dark/Sepia theme variables */
-:root {
-  --background-color: #ffffff;
-  --text-color: #333333;
-  --border-color: #e0e0e0;
-  --header-bg: rgba(255, 255, 255, 0.9);
-}
-
-.dark-theme {
-  --background-color: #121212;
-  --text-color: #e0e0e0;
-  --border-color: #333333;
-  --header-bg: rgba(18, 18, 18, 0.9);
-}
-
-.sepia-theme {
-  --background-color: #f8f0e3;
-  --text-color: #5b4636;
-  --border-color: #d8c8b8;
-  --header-bg: rgba(248, 240, 227, 0.9);
-}
-
-/* Apply theme colors */
-body {
-  background-color: var(--background-color);
-  color: var(--text-color);
-  transition: background-color 0.3s ease, color 0.3s ease;
 }

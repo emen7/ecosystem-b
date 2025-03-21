@@ -3,23 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-rgb: 255, 255, 255;
-  --background-color: #ffffff;
-  --text-color: #333333;
-  --border-color: #e0e0e0;
-  --header-bg: rgba(255, 255, 255, 0.9);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-rgb: 17, 24, 39;
-    --background-color: #121212;
-    --text-color: #e0e0e0;
-    --border-color: #333333;
-    --header-bg: rgba(18, 18, 18, 0.9);
-  }
+  --foreground-rgb: 255, 255, 255;
+  --background-rgb: 17, 24, 39;
 }
 
 body {
@@ -27,32 +12,19 @@ body {
   background: rgb(var(--background-rgb));
 }
 
-/* Theme classes */
 .dark-theme {
   --foreground-rgb: 255, 255, 255;
   --background-rgb: 17, 24, 39;
-  --background-color: #121212;
-  --text-color: #e0e0e0;
-  --border-color: #333333;
-  --header-bg: rgba(18, 18, 18, 0.9);
 }
 
 .light-theme {
   --foreground-rgb: 0, 0, 0;
   --background-rgb: 255, 255, 255;
-  --background-color: #ffffff;
-  --text-color: #333333;
-  --border-color: #e0e0e0;
-  --header-bg: rgba(255, 255, 255, 0.9);
 }
 
 .sepia-theme {
   --foreground-rgb: 50, 30, 0;
   --background-rgb: 251, 240, 217;
-  --background-color: #f8f0e3;
-  --text-color: #5b4636;
-  --border-color: #d8c8b8;
-  --header-bg: rgba(248, 240, 227, 0.9);
 }
 
 /* Font families */
@@ -90,17 +62,3 @@ body {
 .margin-wide {
   max-width: 85ch;
 }
-
-/* Theme-specific styles */
-.modern-theme {
-  --paragraph-spacing: 1.5rem;
-  --line-height: 1.7;
-}
-
-.traditional-theme {
-  --paragraph-spacing: 1.2rem;
-  --line-height: 1.5;
-}
-
-/* Import ui-fixes.css for additional styling */
-@import "./ui-fixes.css";

@@ -1,13 +1,12 @@
 "use client";
 
 import React from "react";
-import { EnhancedThemeProvider } from "./contexts/EnhancedThemeContext";
-import HeaderWithMenu from "./components/ui/HeaderWithMenu";
-import EnhancedReadingArea from "./components/ui/EnhancedReadingArea";
+import { EnhancedThemeProvider } from "../../contexts/EnhancedThemeContext";
+import HeaderWithMenu from "../../components/ui/HeaderWithMenu";
+import EnhancedReadingArea from "../../components/ui/EnhancedReadingArea";
 
-export default function Home() {
-  // Default to showing Paper 1 in the enhanced UI
-  const paperTitle = "Paper 1: The Universal Father";
+export default function EnhancedPaperPage({ params }: { params: { paperNumber: string } }) {
+  const paperTitle = `Paper ${params.paperNumber}`;
   
   return (
     <EnhancedThemeProvider>

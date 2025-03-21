@@ -1,0 +1,168 @@
+/* UI Fixes CSS
+   This file contains specific CSS overrides to fix UI glitches and improve the reading experience
+*/
+
+/* 
+ * Increased scroll margins for section titles
+ * This ensures section jumps position the section title properly below the header
+ */
+.section-title,
+section[id^="section-"] h2,
+h2[id^="title-section-"] {
+  scroll-margin-top: 150px !important;
+}
+
+/* 
+ * Sticky header improvements
+ * Ensures sticky headers don't cover important content
+ */
+.sticky-header {
+  background-color: var(--background-color);
+  z-index: 10;
+  border-bottom: 1px solid var(--border-color);
+  transition: opacity 0.3s ease;
+}
+
+/* 
+ * Section margins to improve spacing and readability
+ */
+section {
+  margin-bottom: 2rem;
+}
+
+/* 
+ * Dropdown menus persistence improvement
+ * Increases hover areas and adds transition delays
+ */
+.dropdown-menu {
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  transition-delay: 0.1s;
+}
+
+.dropdown-menu:hover {
+  transition-delay: 0s;
+}
+
+/* 
+ * Custom scrollbar styling for better visibility
+ */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Dark mode adjustments for custom scrollbar */
+.dark-theme ::-webkit-scrollbar-track {
+  background: #333;
+}
+
+.dark-theme ::-webkit-scrollbar-thumb {
+  background: #666;
+}
+
+.dark-theme ::-webkit-scrollbar-thumb:hover {
+  background: #888;
+}
+
+/* 
+ * Theme-specific adjustments
+ */
+.modern-theme {
+  --paragraph-spacing: 1.5rem;
+  --line-height: 1.7;
+}
+
+.traditional-theme {
+  --paragraph-spacing: 1.2rem;
+  --line-height: 1.5;
+}
+
+/* 
+ * Text content layout improvements
+ * Ensures better text centering on larger screens
+ */
+.max-w-4xl,
+.reading-content {
+  margin: 0 auto;
+  max-width: min(90%, 65ch) !important;
+}
+
+@media (min-width: 1200px) {
+  .max-w-4xl,
+  .reading-content {
+    max-width: min(80%, 70ch) !important;
+  }
+}
+
+/* Improve indentation for paragraphs */
+.modern-paragraph p {
+  text-align: left;
+  margin-bottom: 1.5rem;
+}
+
+/* Ensure paper titles are properly centered */
+h2[id^="title-paper-"] {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+/* Handle section titles differently than numbered sections */
+.section-title:not([id*="-0-"]) {
+  text-align: left;
+  font-weight: 600;
+}
+
+/* Center introductory sections */
+.section-title[id*="-0-"] {
+  text-align: center;
+}
+
+/* Dynamic font size adjustments based on viewport */
+@media (max-width: 768px) {
+  .section-title,
+  section[id^="section-"] h2,
+  h2[id^="title-section-"] {
+    scroll-margin-top: 100px !important;
+  }
+}
+
+/* Light/Dark/Sepia theme variables */
+:root {
+  --background-color: #ffffff;
+  --text-color: #333333;
+  --border-color: #e0e0e0;
+  --header-bg: rgba(255, 255, 255, 0.9);
+}
+
+.dark-theme {
+  --background-color: #121212;
+  --text-color: #e0e0e0;
+  --border-color: #333333;
+  --header-bg: rgba(18, 18, 18, 0.9);
+}
+
+.sepia-theme {
+  --background-color: #f8f0e3;
+  --text-color: #5b4636;
+  --border-color: #d8c8b8;
+  --header-bg: rgba(248, 240, 227, 0.9);
+}
+
+/* Apply theme colors */
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}

@@ -432,7 +432,7 @@ if (paragraphItems.length === 0) {
                   className="section-dropdown-button"
                   onClick={() => setIsSectionDropdownOpen(!isSectionDropdownOpen)}
                 >
-                  <i className="fas fa-list"></i> Jump to Section
+                  <i className="fas fa-list"></i>&nbsp;Jump to Section
                 </button>
                 <div className={`section-dropdown-content ${isSectionDropdownOpen ? 'show' : ''}`}>
                   {sections.map(section => (

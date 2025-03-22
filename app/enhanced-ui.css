@@ -1,61 +1,60 @@
 /* Enhanced Reader UI Styles */
 
-/* General layout styles */
+/* Core layout styles */
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  height: 100vh;
+}
+
 .app-container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
 }
 
-/* Sticky header styles */
-.sticky-header {
-  position: sticky;
-  top: 56px; /* Fixed header height */
-  z-index: 20;
-  background-color: inherit;
-  padding: 0.15rem 0;
-  border-bottom: 1px solid var(--border-color, #4a5568);
-  max-width: 800px;
+/* Header styles */
+.header {
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  height: 56px;
+}
+
+.header-title {
+  font-size: 1.25rem;
+  font-weight: 600;
   margin: 0 auto;
-  width: 100%;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.header-button {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  border-radius: 0.25rem;
+  transition: color 0.2s, background-color 0.2s;
+}
+
+/* Content container styles */
+.content-container {
+  flex: 1;
+  overflow-y: hidden;
+  margin-top: 56px;
   display: flex;
   flex-direction: column;
 }
 
-.sticky-part-title {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--secondary-text, #a0aec0);
-  text-align: center;
-  margin-bottom: 0.25rem;
-}
-
-.sticky-paper-title {
-  font-size: 0.9rem;
-  font-weight: 600;
-  text-align: center;
-  color: var(--text-color, #e2e8f0);
-}
-
-.sticky-section-title {
-  position: sticky;
-  top: 86px; /* Adjusted to be closer to header */
-  padding: 0.5rem 0;
-  background-color: inherit;
-  z-index: 19;
-  border-bottom: 1px solid var(--border-color, #4a5568);
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--secondary-text, #a0aec0);
-  max-width: 800px;
-  margin: 0 auto;
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-/* Reading area styles */
 .reading-area {
   flex: 1;
   overflow-y: auto;
@@ -76,26 +75,14 @@
   font-weight: 700;
   margin: 2rem 0 1.5rem;
   text-align: center;
-  color: var(--text-color, #e2e8f0);
 }
 
 .section-title {
   font-size: 1.25rem;
   font-weight: 600;
   margin: 2rem 0 1rem;
-  color: var(--secondary-text, #a0aec0);
   padding-top: 0.5rem;
-  border-top: 1px solid var(--border-color, #4a5568);
-}
-
-.section-title-intro {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin: 2rem 0 1rem;
-  color: var(--secondary-text, #a0aec0);
-  padding-top: 0.5rem;
-  border-top: 1px solid var(--border-color, #4a5568);
-  font-style: italic;
+  border-top: 1px solid;
 }
 
 .section-content {
@@ -122,20 +109,60 @@
   flex: 1;
 }
 
-/* Section navigation dropdown */
+/* Sticky header styles - critical for proper behavior */
+.sticky-header {
+  position: sticky;
+  top: 56px; /* Align with the header */
+  z-index: 10;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.sticky-part-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 0.25rem;
+}
+
+.sticky-paper-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.sticky-section-title {
+  position: sticky;
+  top: 84px; /* Header (56px) + sticky header height (~28px) */
+  padding: 0.5rem 0;
+  z-index: 9;
+  border-bottom: 1px solid;
+  font-size: 0.875rem;
+  font-weight: 600;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Move section navigation out of margin and into the layout flow */
 .section-navigation {
+  display: inline-flex;
   position: relative;
-  display: inline-block;
-  z-index: 25;
+  margin: 0;
 }
 
 .section-dropdown-button {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background-color: var(--background-color);
-  color: var(--text-color);
-  border: 1px solid var(--border-color);
+  border: 1px solid;
   border-radius: 0.25rem;
   padding: 0.3rem 0.5rem;
   font-size: 0.8rem;
@@ -146,28 +173,21 @@
 .section-dropdown-content {
   display: none;
   position: absolute;
-  background-color: var(--background-color);
   min-width: 200px;
-  border: 1px solid var(--border-color);
+  border: 1px solid;
   border-radius: 0.25rem;
   z-index: 50;
   margin-top: 0.25rem;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   max-height: 300px;
   overflow-y: auto;
-  right: 0;
 }
 
 .section-dropdown-content a {
-  color: var(--text-color, #e2e8f0);
   padding: 0.5rem 0.75rem;
   text-decoration: none;
   display: block;
   font-size: 0.8rem;
-}
-
-.section-dropdown-content a:hover {
-  background-color: var(--hover-color, #4a5568);
 }
 
 .section-dropdown-content.show {
@@ -210,74 +230,165 @@
   display: none;
 }
 
-/* Section navigation dropdown - match z-index */
-.section-dropdown-content {
-  z-index: 25;
-}
-
-/* Content container spacing */
-.content-container {
-  padding-top: 56px; /* Match header height */
-}
-
-/* Header styling */
-header {
+/* Overlay */
+.overlay {
   position: fixed;
-  top: 0;
+  top: 56px;
   left: 0;
   right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
   z-index: 30;
-  height: 56px;
-  background-color: var(--background-color);
-  border-bottom: 1px solid var(--border-color);
+  display: none;
 }
 
-/* Dark/Light themes with modern colors */
+.overlay.active {
+  display: block;
+}
+
+/* Theme colors - direct application to ensure proper behavior */
 .dark-theme {
-  background-color: #000000; /* True black for OLED screens */
+  background-color: #000000;
   color: #ffffff;
-  --background-color: #000000;
-  --text-color: #ffffff;
-  --secondary-text: #b5bfd3;
-  --border-color: #2d333b;
-  --hover-color: #2d333b;
-  --active-color: #0078d7; /* Modern blue accent */
+}
+
+.dark-theme header,
+.dark-theme .header {
+  background-color: #2d3748;
+  border-bottom: 1px solid #4a5568;
+  color: #e2e8f0;
+}
+
+.dark-theme .header-button {
+  color: #a0aec0;
+}
+
+.dark-theme .header-button:hover {
+  color: #e2e8f0;
+  background-color: #4a5568;
+}
+
+.dark-theme .navigation-menu,
+.dark-theme .settings-panel {
+  background-color: #2d3748;
+  border-color: #4a5568;
+}
+
+.dark-theme .sticky-header,
+.dark-theme .sticky-section-title {
+  background-color: #000000;
+  border-bottom-color: #4a5568;
+}
+
+.dark-theme .sticky-part-title {
+  color: #a0aec0;
+}
+
+.dark-theme .sticky-paper-title {
+  color: #e2e8f0;
+}
+
+.dark-theme .sticky-section-title {
+  color: #a0aec0;
+}
+
+.dark-theme .section-title {
+  color: #a0aec0;
+  border-top-color: #4a5568;
+}
+
+.dark-theme .paper-title {
+  color: #e2e8f0;
+}
+
+.dark-theme .section-dropdown-button {
+  background-color: #2d3748;
+  color: #e2e8f0;
+  border-color: #4a5568;
+}
+
+.dark-theme .section-dropdown-content {
+  background-color: #2d3748;
+  border-color: #4a5568;
+}
+
+.dark-theme .section-dropdown-content a {
+  color: #e2e8f0;
+}
+
+.dark-theme .section-dropdown-content a:hover {
+  background-color: #4a5568;
 }
 
 .light-theme {
   background-color: #ffffff;
   color: #0f172a;
-  --background-color: #ffffff;
-  --text-color: #0f172a; /* Deep blue-black for better contrast */
-  --secondary-text: #4b5563;
-  --border-color: #e5e7eb;
-  --hover-color: #f3f4f6;
-  --active-color: #0078d7; /* Modern blue accent */
 }
 
-/* Ensure app container inherits theme background */
-.app-container {
-  background-color: inherit;
+.light-theme header,
+.light-theme .header {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  color: #0f172a;
 }
 
-/* Fix for sticky headers - ensure they actually stick */
-.app-container,
-.reading-area,
-body,
-html {
-  height: 100%;
-  min-height: 100vh;
-  overflow-x: hidden;
+.light-theme .header-button {
+  color: #4b5563;
 }
 
-.reading-area {
-  padding-top: 0;
-  padding-bottom: 2rem;
+.light-theme .header-button:hover {
+  color: #1a202c;
+  background-color: #f3f4f6;
 }
 
-/* System theme icon style */
-.system-theme-icon {
-  display: inline-flex;
-  align-items: center;
-  margin-left: 4px;
+.light-theme .navigation-menu,
+.light-theme .settings-panel {
+  background-color: #ffffff;
+  border-color: #e5e7eb;
+}
+
+.light-theme .sticky-header,
+.light-theme .sticky-section-title {
+  background-color: #ffffff;
+  border-bottom-color: #e5e7eb;
+}
+
+.light-theme .sticky-part-title {
+  color: #4b5563;
+}
+
+.light-theme .sticky-paper-title {
+  color: #0f172a;
+}
+
+.light-theme .sticky-section-title {
+  color: #4b5563;
+}
+
+.light-theme .section-title {
+  color: #4b5563;
+  border-top-color: #e5e7eb;
+}
+
+.light-theme .paper-title {
+  color: #0f172a;
+}
+
+.light-theme .section-dropdown-button {
+  background-color: #ffffff;
+  color: #0f172a;
+  border-color: #e5e7eb;
+}
+
+.light-theme .section-dropdown-content {
+  background-color: #ffffff;
+  border-color: #e5e7eb;
+}
+
+.light-theme .section-dropdown-content a {
+  color: #0f172a;
+}
+
+.light-theme .section-dropdown-content a:hover {
+  background-color: #f3f4f6;
 }

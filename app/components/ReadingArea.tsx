@@ -24,12 +24,14 @@ const ReadingArea: React.FC<ReadingAreaProps> = ({
   const [sections, setSections] = useState<Array<{id: string, number: string, title: string}>>([]);
   const [activePart, setActivePart] = useState("Part I: The Central and Superuniverses");
   const [activeSection, setActiveSection] = useState("");
+  const [currentSectionTitle, setCurrentSectionTitle] = useState("");
   const [isSectionDropdownOpen, setIsSectionDropdownOpen] = useState(false);
   const [showCopyToast, setShowCopyToast] = useState(false);
   
   // Refs
   const readingAreaRef = useRef<HTMLDivElement>(null);
   const sectionDropdownRef = useRef<HTMLDivElement>(null);
+  const stickySectionTitleRef = useRef<HTMLDivElement>(null);
   
   // Determine current part based on paper number
   useEffect(() => {
@@ -58,7 +60,6 @@ const ReadingArea: React.FC<ReadingAreaProps> = ({
         setLoading(true);
         setError(null);
         
-        // Handle case where selectedPaper is empty or undefined
         if (!selectedPaper) {
           setContent('Please select a paper.');
           setParagraphs([]);
@@ -87,7 +88,7 @@ const ReadingArea: React.FC<ReadingAreaProps> = ({
         
         console.log(`Fetching paper: ${paperNumber}`);
         
-        // Use the path to the JSON files, relative to the public directory
+        // Fetch the JSON data
         const response = await fetch(`/json/${paperNumber}.json`);
         
         if (!response.ok) {
@@ -120,83 +121,84 @@ const ReadingArea: React.FC<ReadingAreaProps> = ({
             // Set active section
             setActiveSection(selectedSection);
             
-  // Process paragraphs for the section
-  const paragraphItems = data.filter((item: any) => 
-    item.type === "paragraph" && 
-    item.paperSectionId === `${paperNumber}.${sectionNumber}`
-  );
-  
-  setParagraphs(paragraphItems.map((item: any, index: number) => ({
-    id: `p-${paperNumber}-${sectionNumber}-${index + 1}`,
-    number: index + 1,
-    text: item.text
-  })));
-  
-  // If no paragraphs found, display message
-  if (paragraphItems.length === 0) {
-    setContent('No content found for this section.');
-  } else {
-    setContent('');
-  }
+            // Process paragraphs for the section
+            const paragraphItems = data.filter((item: any) => 
+              item.type === "paragraph" && 
+              item.paperSectionId === `${paperNumber}.${sectionNumber}`
+            );
+            
+            setParagraphs(paragraphItems.map((item: any, index: number) => ({
+              id: `p-${paperNumber}-${sectionNumber}-${index + 1}`,
+              number: index + 1,
+              text: item.text
+            })));
+            
+            // If no paragraphs found, display message
+            if (paragraphItems.length === 0) {
+              setContent('No content found for this section.');
+            } else {
+              setContent('');
+            }
           } else {
             setContent('Invalid section selection.');
             setParagraphs([]);
           }
         } else {
-// If no section is selected, show all paragraphs
-const paragraphItems = data.filter((item: any) => item.type === "paragraph");
-
-// Group paragraphs by section
-const groupedParagraphs: Record<string, any[]> = {};
-
-paragraphItems.forEach((item: any) => {
-  const sectionId = item.paperSectionId?.split('.')[1] || '0';
-  if (!groupedParagraphs[sectionId]) {
-    groupedParagraphs[sectionId] = [];
-  }
-  groupedParagraphs[sectionId].push(item);
-});
-
-// Extract section titles including introduction (section 0)
-const allSections = data.filter((item: any) => 
-  item.type === "section_title" || 
-  (item.type === "section" && item.sectionId === "0")
-).map((item: any) => {
-  const sectionId = item.paperSectionId?.split('.')[1] || "0";
-  return {
-    id: `section-${sectionId}`,
-    number: sectionId,
-    title: item.sectionTitle || (sectionId === "0" ? "Introduction" : item.text || "")
-  };
-});
-setSections(allSections);
-
-// Flatten and add paragraph numbers
-const allParagraphs: {id: string, number: number, text: string}[] = [];
-
-Object.entries(groupedParagraphs).forEach(([sectionId, sectionParagraphs]) => {
-  sectionParagraphs.forEach((item, index) => {
-    allParagraphs.push({
-      id: `p-${paperNumber}-${sectionId}-${index + 1}`,
-      number: index + 1,
-      text: item.text
-    });
-  });
-});
-
-setParagraphs(allParagraphs);
-
-// Use first section as active if available
-if (sections.length > 0) {
-  setActiveSection(sections[0].title || "Introduction");
-}
-
-// If no paragraphs found, display message
-if (paragraphItems.length === 0) {
-  setContent('No content found for this paper.');
-} else {
-  setContent('');
-}
+          // If no section is selected, show all paragraphs
+          const paragraphItems = data.filter((item: any) => item.type === "paragraph");
+          
+          // Group paragraphs by section
+          const groupedParagraphs: Record<string, any[]> = {};
+          
+          paragraphItems.forEach((item: any) => {
+            const sectionId = item.paperSectionId?.split('.')[1] || '0';
+            if (!groupedParagraphs[sectionId]) {
+              groupedParagraphs[sectionId] = [];
+            }
+            groupedParagraphs[sectionId].push(item);
+          });
+          
+          // Extract section titles including introduction (section 0)
+          const allSections = data.filter((item: any) => 
+            item.type === "section_title" || 
+            (item.type === "section" && item.sectionId === "0")
+          ).map((item: any) => {
+            const sectionId = item.paperSectionId?.split('.')[1] || "0";
+            return {
+              id: `section-${sectionId}`,
+              number: sectionId,
+              title: item.sectionTitle || (sectionId === "0" ? "Introduction" : item.text || "")
+            };
+          });
+          setSections(allSections);
+          
+          // Flatten and add paragraph numbers
+          const allParagraphs: {id: string, number: number, text: string}[] = [];
+          
+          Object.entries(groupedParagraphs).forEach(([sectionId, sectionParagraphs]) => {
+            sectionParagraphs.forEach((item, index) => {
+              allParagraphs.push({
+                id: `p-${paperNumber}-${sectionId}-${index + 1}`,
+                number: index + 1,
+                text: item.text
+              });
+            });
+          });
+          
+          setParagraphs(allParagraphs);
+          
+          // Use first section as active if available
+          if (allSections.length > 0) {
+            setActiveSection(allSections[0].title || "");
+            setCurrentSectionTitle(allSections[0].title || "");
+          }
+          
+          // If no paragraphs found, display message
+          if (paragraphItems.length === 0) {
+            setContent('No content found for this paper.');
+          } else {
+            setContent('');
+          }
         }
       } catch (error) {
         console.error('Error fetching content:', error);
@@ -212,6 +214,64 @@ if (paragraphItems.length === 0) {
     fetchContent();
   }, [selectedPaper, selectedSection]);
   
+  // Section detection on scroll
+  useEffect(() => {
+    const readingArea = readingAreaRef.current;
+    if (!readingArea) return;
+    
+    const handleScroll = () => {
+      // Get the section headers visible in the viewport or just above it
+      const sectionElements = readingArea.querySelectorAll('.section-title');
+      if (sectionElements.length === 0) return;
+      
+      let newSectionTitle = '';
+      let highestVisibleSection = null;
+      let highestPosition = -Infinity;
+      
+      sectionElements.forEach(section => {
+        const rect = section.getBoundingClientRect();
+        // Only consider sections that are in the viewport or just above it (allowing some margin)
+        // Use 150px as threshold to account for the sticky header height and some margin
+        if (rect.top <= 150) {
+          // Find the highest (closest to top but still above threshold) section
+          if (rect.top > highestPosition) {
+            highestPosition = rect.top;
+            highestVisibleSection = section;
+          }
+        }
+      });
+      
+      // If we found a visible section, use it
+      if (highestVisibleSection) {
+        newSectionTitle = highestVisibleSection.textContent || '';
+      } else if (sectionElements.length > 0) {
+        // Fallback to the first section if none are visible yet
+        newSectionTitle = sectionElements[0].textContent || '';
+      }
+      
+      // Only update if the section title has changed
+      if (newSectionTitle && newSectionTitle !== currentSectionTitle) {
+        setCurrentSectionTitle(newSectionTitle);
+        setActiveSection(newSectionTitle);
+        
+        // Update the sticky section title text
+        if (stickySectionTitleRef.current) {
+          stickySectionTitleRef.current.textContent = newSectionTitle;
+        }
+      }
+    };
+    
+    // Add scroll event listener to the reading area element
+    readingArea.addEventListener('scroll', handleScroll);
+    
+    // Initial check
+    setTimeout(handleScroll, 200);
+    
+    return () => {
+      readingArea.removeEventListener('scroll', handleScroll);
+    };
+  }, [sections, currentSectionTitle]);
+  
   // Click away listener for section dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -223,9 +283,9 @@ if (paragraphItems.length === 0) {
       }
     };
     
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('click', handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('click', handleClickOutside);
     };
   }, []);
   
@@ -244,6 +304,46 @@ if (paragraphItems.length === 0) {
     }
   };
   
+  // Jump to section
+  const handleJumpToSection = (sectionId: string) => {
+    setIsSectionDropdownOpen(false);
+    
+    const targetSection = sections.find(section => section.id === sectionId);
+    if (!targetSection) return;
+    
+    const targetElement = document.getElementById(sectionId);
+    if (!targetElement) return;
+    
+    // Calculate offset
+    // 56px (main header) + 64px (sticky headers) + 40px (extra padding)
+    const offset = 160;
+    
+    // Get the element's position relative to the top of the document
+    const elementPosition = targetElement.getBoundingClientRect().top + window.scrollY;
+    
+    // Scroll to the element with the offset adjustment
+    window.scrollTo({
+      top: elementPosition - offset,
+      behavior: 'smooth'
+    });
+    
+    // Update section titles
+    setActiveSection(targetSection.title);
+    setCurrentSectionTitle(targetSection.title);
+    
+    // Ensure we've actually reached the correct position after animation
+    setTimeout(() => {
+      // Double-check after animation if we need to adjust a bit more
+      const finalRect = targetElement.getBoundingClientRect();
+      if (finalRect.top < 100 || finalRect.top > 180) {
+        window.scrollTo({
+          top: window.scrollY + finalRect.top - (offset - 60),
+          behavior: 'auto'
+        });
+      }
+    }, 500);
+  };
+  
   // Effect to scroll to the specified paragraph when it's available
   useEffect(() => {
     if (paragraphNumber && paragraphs.length > 0) {
@@ -255,14 +355,10 @@ if (paragraphItems.length === 0) {
         if (paragraphElement) {
           // Add a small delay to ensure the DOM is fully rendered
           setTimeout(() => {
-            // Get header height to calculate proper offset
-            const header = document.querySelector('header');
-            const headerHeight = header ? header.offsetHeight : 60; // Default if header not found
+            // Calculate offset - headers + extra space
+            const offset = 160;
             
-            // Account for sticky headers (about 100px total)
-            const offset = headerHeight + 100; 
-            
-            // Use scrollTo instead of scrollIntoView for more control
+            // Use scrollTo for more control
             window.scrollTo({
               top: paragraphElement.offsetTop - offset,
               behavior: 'smooth'
@@ -278,121 +374,8 @@ if (paragraphItems.length === 0) {
       }
     }
   }, [paragraphNumber, paragraphs]);
-  
-  // Add scroll detection to update the sticky section title
-  useEffect(() => {
-    const handleScroll = () => {
-      // Don't update if there are no sections
-      if (sections.length === 0) return;
-      
-      // Get all section elements in the DOM
-      const sectionElements = Array.from(document.querySelectorAll('.section-content'));
-      if (sectionElements.length === 0) return;
-      
-      // Find the section currently in view
-      let currentSectionEl = null;
-      let closestPosition = -Infinity;
-      
-      // Fixed header height plus buffer
-      const headerOffset = 150; 
-      
-      sectionElements.forEach(section => {
-        const rect = section.getBoundingClientRect();
-        // Look for sections that are near the top of the viewport but already scrolled past the header
-        if (rect.top <= headerOffset && rect.top > closestPosition) {
-          closestPosition = rect.top;
-          currentSectionEl = section;
-        }
-      });
-      
-      // If we found a section in view
-      if (currentSectionEl) {
-        const sectionId = currentSectionEl.id;
-        const section = sections.find(s => s.id === sectionId);
-        
-        if (section) {
-          // Only update if different from current active section
-          if (section.title !== activeSection) {
-            setActiveSection(section.title);
-          }
-        }
-      } else if (sectionElements.length > 0) {
-        // If no section is in view (likely at the top), use the first section
-        const firstSectionId = sectionElements[0].id;
-        const firstSection = sections.find(s => s.id === firstSectionId);
-        if (firstSection && firstSection.title !== activeSection) {
-          setActiveSection(firstSection.title);
-        }
-      }
-    };
-    
-    // Add scroll listener to window instead of reading area
-    window.addEventListener('scroll', handleScroll);
-    
-    // Initial check
-    setTimeout(handleScroll, 200); // Slight delay to ensure DOM is ready
-    
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, [sections, activeSection]);
 
-  // Jump to section
-  const handleJumpToSection = (sectionId: string) => {
-    setIsSectionDropdownOpen(false);
-    
-    const targetSection = sections.find(section => section.id === sectionId);
-    if (!targetSection) return;
-    
-    const targetElement = document.getElementById(sectionId);
-    if (!targetElement) return;
-    
-    // Calculate offset for sticky headers
-    const header = document.querySelector('header');
-    const headerHeight = header ? header.offsetHeight : 60;
-    const offset = headerHeight + 100; // Additional space for sticky headers
-    
-    // Scroll to the section
-    window.scrollTo({
-      top: targetElement.offsetTop - offset,
-      behavior: 'smooth'
-    });
-    
-    // Update active section
-    setActiveSection(targetSection.title);
-  };
-
-  // Get font classes based on theme
-  const getFontFamilyClass = () => {
-    return theme.fontFamily === 'serif' ? 'font-serif' : 'font-sans';
-  };
-
-  const getFontSizeClass = () => {
-    switch (theme.fontSize) {
-      case 'small': return 'text-sm';
-      case 'large': return 'text-lg';
-      case 'xlarge': return 'text-xl';
-      default: return 'text-base'; // medium
-    }
-  };
-
-  const getLineSpacingClass = () => {
-    switch (theme.lineSpacing) {
-      case 'compact': return 'leading-snug';
-      case 'relaxed': return 'leading-relaxed';
-      default: return 'leading-normal'; // normal
-    }
-  };
-
-  const getMarginWidthClass = () => {
-    switch (theme.marginWidth) {
-      case 'narrow': return 'mx-2 md:mx-4';
-      case 'wide': return 'mx-8 md:mx-16';
-      default: return 'mx-4 md:mx-8'; // medium
-    }
-  };
-
-  // Determine theme class based on effective color scheme
+  // Theme class - simplified approach
   const themeClass = effectiveColorScheme === 'light' ? 'light-theme' : 'dark-theme';
 
   if (loading) {
@@ -409,30 +392,42 @@ if (paragraphItems.length === 0) {
 
   return (
     <div className={`app-container ${themeClass}`}>
-      <div className="reading-area" ref={readingAreaRef}>
-        <div className="content">
-          {/* Sticky Headers */}
-          <div className="sticky-header">
-            <div className="sticky-part-title">{activePart}</div>
-            <div className="sticky-paper-title">{selectedPaper}</div>
-          </div>
+      {/* Content Container */}
+      <div className="content-container">
+        {/* Reading Area - attached scroll handler to this div */}
+        <div className="reading-area" id="reading-area" ref={readingAreaRef}>
+          <div className="content">
+            {/* Sticky Headers */}
+            <div className="sticky-header">
+              <div className="sticky-part-title" id="sticky-part-title">
+                {activePart}
+              </div>
+              <div className="sticky-paper-title" id="sticky-paper-title">
+                {selectedPaper}
+              </div>
+            </div>
 
-          {/* Sticky Section Title and Jump Menu */}
-          <div className="sticky-section-title">
-            <span>
-              {/* Show section title but replace "Introduction" with empty string */}
-              {(activeSection && activeSection !== 'Introduction') 
-                ? activeSection 
-                : ''}
-            </span>
-            
+            {/* Sticky Section Title - Only show non-Introduction sections */}
+            <div 
+              className="sticky-section-title" 
+              id="sticky-section-title"
+              ref={stickySectionTitleRef}
+            >
+              {activeSection !== 'Introduction' ? activeSection : ''}
+            </div>
+
+            {/* Section Navigation - Positioned after sticky section title as in demo */}
             {sections.length > 1 && (
               <div className="section-navigation" ref={sectionDropdownRef}>
                 <button 
                   className="section-dropdown-button"
-                  onClick={() => setIsSectionDropdownOpen(!isSectionDropdownOpen)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsSectionDropdownOpen(!isSectionDropdownOpen);
+                  }}
                 >
-                  <i className="fas fa-list"></i>&nbsp;Jump to Section
+                  <i className="fas fa-list"></i>
+                  &nbsp;Jump to Section
                 </button>
                 <div className={`section-dropdown-content ${isSectionDropdownOpen ? 'show' : ''}`}>
                   {sections.map(section => (
@@ -444,62 +439,65 @@ if (paragraphItems.length === 0) {
                         handleJumpToSection(section.id);
                       }}
                     >
-                      {section.number === "0" ? "Introduction" : `${section.number}. ${section.title.replace(/^\d+\.\s*/i, '')}`}
+                      {section.number === "0" ? "Introduction" : 
+                        `${section.number}. ${section.title.replace(/^\d+\.\s*/i, '')}`}
                     </a>
                   ))}
                 </div>
               </div>
             )}
-          </div>
 
-          {/* Paper Title */}
-          <h2 className="paper-title">
-            PAPER {selectedPaper.match(/\d+/)?.[0] || ''}<br />
-            {selectedPaper.replace(/^Paper \d+:\s*/i, '')}
-          </h2>
+            {/* Paper Title */}
+            <h2 className="paper-title">
+              {selectedPaper === "Foreword" ? "FOREWORD" : 
+                `PAPER ${selectedPaper.match(/\d+/)?.[0] || ''}`}
+              <br />
+              {selectedPaper.replace(/^(Paper \d+:|Foreword)(\s*)/i, '')}
+            </h2>
 
-      {/* Sections and Paragraphs */}
-      {sections.map((section) => {
-        // Get paragraphs for this section
-        const sectionParagraphs = paragraphs.filter(p => 
-          p.id.includes(`-${section.number}-`)
-        );
-        
-        return (
-          <div key={section.id} id={section.id} className="section-content">
-            {/* Only render section title if it's not section 0 (introduction) */}
-            {section.number !== "0" && (
-              <h3 className="section-title">
-                {section.number}. {section.title.replace(/^\d+\.\s*/i, '')}
-              </h3>
+            {/* Sections and Paragraphs */}
+            {sections.map((section) => {
+              // Get paragraphs for this section
+              const sectionParagraphs = paragraphs.filter(p => 
+                p.id.includes(`-${section.number}-`)
+              );
+              
+              return (
+                <div key={section.id} id={section.id} className="section-content">
+                  {/* Only render section title if it's not section 0 (introduction) */}
+                  {section.number !== "0" && (
+                    <h3 className="section-title" id={`section${section.number}`}>
+                      {section.number}. {section.title.replace(/^\d+\.\s*/i, '')}
+                    </h3>
+                  )}
+                  
+                  {sectionParagraphs.map((paragraph) => (
+                    <div key={paragraph.id} id={paragraph.id} className="paragraph">
+                      <span className="paragraph-number">{paragraph.number}</span>
+                      <div className="paragraph-text">{paragraph.text}</div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
+            
+            {/* If no sections but paragraphs exist (fallback) */}
+            {sections.length === 0 && paragraphs.length > 0 && (
+              <div className="section-content">
+                {paragraphs.map((paragraph) => (
+                  <div key={paragraph.id} id={paragraph.id} className="paragraph">
+                    <span className="paragraph-number">{paragraph.number}</span>
+                    <div className="paragraph-text">{paragraph.text}</div>
+                  </div>
+                ))}
+              </div>
             )}
             
-            {sectionParagraphs.map((paragraph) => (
-              <div key={paragraph.id} id={paragraph.id} className="paragraph">
-                <span className="paragraph-number">{paragraph.number}</span>
-                <div className="paragraph-text">{paragraph.text}</div>
-              </div>
-            ))}
+            {/* Show content if no paragraphs */}
+            {paragraphs.length === 0 && content && (
+              <div className="mt-4">{content}</div>
+            )}
           </div>
-        );
-      })}
-      
-      {/* If no sections but paragraphs exist (fallback) */}
-      {sections.length === 0 && paragraphs.length > 0 && (
-        <div className="section-content">
-          {paragraphs.map((paragraph) => (
-            <div key={paragraph.id} id={paragraph.id} className="paragraph">
-              <span className="paragraph-number">{paragraph.number}</span>
-              <div className="paragraph-text">{paragraph.text}</div>
-            </div>
-          ))}
-        </div>
-      )}
-          
-          {/* Show content if no paragraphs */}
-          {paragraphs.length === 0 && content && (
-            <div className="mt-4">{content}</div>
-          )}
         </div>
       </div>
       
@@ -509,10 +507,7 @@ if (paragraphItems.length === 0) {
         onClick={handleCopyToClipboard}
         title="Copy selected text"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-        </svg>
+        <i className="fas fa-copy"></i>
       </button>
       
       {/* Toast Notification */}

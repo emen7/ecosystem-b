@@ -256,7 +256,7 @@ const ReadingArea: React.FC<ReadingAreaProps> = ({
         
         // Update the sticky section title text
         if (stickySectionTitleRef.current) {
-          stickySectionTitleRef.current.textContent = newSectionTitle;
+          stickySectionTitleRef.current.textContent = newSectionTitle === 'Introduction' ? '' : newSectionTitle;
         }
       }
     };
@@ -302,6 +302,12 @@ const ReadingArea: React.FC<ReadingAreaProps> = ({
           console.error('Failed to copy text:', err);
         });
     }
+  };
+  
+  // Process text for italics
+  const processText = (text: string) => {
+    // This regex finds text between _underscores_ and replaces with italic tags
+    return text.replace(/_([^_]+)_/g, '<span class="italic">$1</span>');
   };
   
   // Jump to section
@@ -397,13 +403,42 @@ const ReadingArea: React.FC<ReadingAreaProps> = ({
         {/* Reading Area - attached scroll handler to this div */}
         <div className="reading-area" id="reading-area" ref={readingAreaRef}>
           <div className="content">
-            {/* Sticky Headers */}
+            {/* Sticky Header with Jump Navigation */}
             <div className="sticky-header">
-              <div className="sticky-part-title" id="sticky-part-title">
-                {activePart}
-              </div>
-              <div className="sticky-paper-title" id="sticky-paper-title">
+              <div className="sticky-part-title">{activePart}</div>
+              <div className="sticky-paper-title" style={{ position: 'relative' }}>
                 {selectedPaper}
+                
+                {/* Jump to section in sticky header */}
+                {sections.length > 1 && (
+                  <div className="section-navigation section-dropdown-in-header" ref={sectionDropdownRef}>
+                    <button 
+                      className="section-dropdown-button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsSectionDropdownOpen(!isSectionDropdownOpen);
+                      }}
+                    >
+                      <i className="fas fa-list"></i>
+                      &nbsp;Jump to Section
+                    </button>
+                    <div className={`section-dropdown-content ${isSectionDropdownOpen ? 'show' : ''}`}>
+                      {sections.map(section => (
+                        <a 
+                          key={section.id}
+                          href={`#${section.id}`}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleJumpToSection(section.id);
+                          }}
+                        >
+                          {section.number === "0" ? "Introduction" : 
+                            `${section.number}. ${section.title.replace(/^\d+\.\s*/i, '')}`}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -415,37 +450,6 @@ const ReadingArea: React.FC<ReadingAreaProps> = ({
             >
               {activeSection !== 'Introduction' ? activeSection : ''}
             </div>
-
-            {/* Section Navigation - Positioned after sticky section title as in demo */}
-            {sections.length > 1 && (
-              <div className="section-navigation" ref={sectionDropdownRef}>
-                <button 
-                  className="section-dropdown-button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsSectionDropdownOpen(!isSectionDropdownOpen);
-                  }}
-                >
-                  <i className="fas fa-list"></i>
-                  &nbsp;Jump to Section
-                </button>
-                <div className={`section-dropdown-content ${isSectionDropdownOpen ? 'show' : ''}`}>
-                  {sections.map(section => (
-                    <a 
-                      key={section.id}
-                      href={`#${section.id}`}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handleJumpToSection(section.id);
-                      }}
-                    >
-                      {section.number === "0" ? "Introduction" : 
-                        `${section.number}. ${section.title.replace(/^\d+\.\s*/i, '')}`}
-                    </a>
-                  ))}
-                </div>
-              </div>
-            )}
 
             {/* Paper Title */}
             <h2 className="paper-title">
@@ -474,7 +478,10 @@ const ReadingArea: React.FC<ReadingAreaProps> = ({
                   {sectionParagraphs.map((paragraph) => (
                     <div key={paragraph.id} id={paragraph.id} className="paragraph">
                       <span className="paragraph-number">{paragraph.number}</span>
-                      <div className="paragraph-text">{paragraph.text}</div>
+                      <div 
+                        className="paragraph-text"
+                        dangerouslySetInnerHTML={{ __html: processText(paragraph.text) }}
+                      />
                     </div>
                   ))}
                 </div>
@@ -487,7 +494,10 @@ const ReadingArea: React.FC<ReadingAreaProps> = ({
                 {paragraphs.map((paragraph) => (
                   <div key={paragraph.id} id={paragraph.id} className="paragraph">
                     <span className="paragraph-number">{paragraph.number}</span>
-                    <div className="paragraph-text">{paragraph.text}</div>
+                    <div 
+                      className="paragraph-text"
+                      dangerouslySetInnerHTML={{ __html: processText(paragraph.text) }}
+                    />
                   </div>
                 ))}
               </div>

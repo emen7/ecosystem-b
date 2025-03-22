@@ -109,12 +109,17 @@ body {
   flex: 1;
 }
 
+/* Italic text */
+.italic {
+  font-style: italic;
+}
+
 /* Sticky header styles - critical for proper behavior */
 .sticky-header {
   position: sticky;
-  top: 56px; /* Align with the header */
+  top: 56px; /* Align right below the header */
   z-index: 10;
-  padding: 0.5rem 0;
+  padding: 0.3rem 0;
   border-bottom: 1px solid;
   max-width: 800px;
   margin: 0 auto;
@@ -127,7 +132,7 @@ body {
   font-size: 0.8rem;
   font-weight: 600;
   text-align: center;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.1rem;
 }
 
 .sticky-paper-title {
@@ -138,7 +143,7 @@ body {
 
 .sticky-section-title {
   position: sticky;
-  top: 84px; /* Header (56px) + sticky header height (~28px) */
+  top: 78px; /* Reduced: Header (56px) + sticky header height (~22px) */
   padding: 0.5rem 0;
   z-index: 9;
   border-bottom: 1px solid;
@@ -149,9 +154,18 @@ body {
   width: 100%;
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 
-/* Move section navigation out of margin and into the layout flow */
+/* Move section navigation into the sticky header */
+.section-dropdown-in-header {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Section navigation dropdown */
 .section-navigation {
   display: inline-flex;
   position: relative;
@@ -181,6 +195,7 @@ body {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   max-height: 300px;
   overflow-y: auto;
+  right: 0;
 }
 
 .section-dropdown-content a {
@@ -188,6 +203,10 @@ body {
   text-decoration: none;
   display: block;
   font-size: 0.8rem;
+}
+
+.section-dropdown-content a:hover {
+  background-color: var(--hover-color, #4a5568);
 }
 
 .section-dropdown-content.show {
@@ -237,9 +256,13 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.3);
   z-index: 30;
   display: none;
+}
+
+.light-theme .overlay {
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 .overlay.active {
@@ -272,6 +295,7 @@ body {
 .dark-theme .settings-panel {
   background-color: #2d3748;
   border-color: #4a5568;
+  color: #e2e8f0;
 }
 
 .dark-theme .sticky-header,
@@ -345,6 +369,7 @@ body {
 .light-theme .settings-panel {
   background-color: #ffffff;
   border-color: #e5e7eb;
+  color: #0f172a;
 }
 
 .light-theme .sticky-header,

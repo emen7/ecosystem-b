@@ -419,33 +419,38 @@ if (paragraphItems.length === 0) {
 
           {/* Sticky Section Title and Jump Menu */}
           <div className="sticky-section-title">
-            {activeSection || (sections[0]?.title ?? 'Introduction')}
-          </div>
-          
-          {sections.length > 1 && (
-            <div className="section-navigation" ref={sectionDropdownRef}>
-              <button 
-                className="section-dropdown-button"
-                onClick={() => setIsSectionDropdownOpen(!isSectionDropdownOpen)}
-              >
-                Jump to Section
-              </button>
-              <div className={`section-dropdown-content ${isSectionDropdownOpen ? 'show' : ''}`}>
-                {sections.map(section => (
-                  <a 
-                    key={section.id}
-                    href={`#${section.id}`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleJumpToSection(section.id);
-                    }}
-                  >
-                    {section.number}. {section.title.replace(/^\d+\.\s*/i, '')}
-                  </a>
-                ))}
+            <span>
+              {/* Show section title but replace "Introduction" with empty string */}
+              {(activeSection && activeSection !== 'Introduction') 
+                ? activeSection 
+                : ''}
+            </span>
+            
+            {sections.length > 1 && (
+              <div className="section-navigation" ref={sectionDropdownRef}>
+                <button 
+                  className="section-dropdown-button"
+                  onClick={() => setIsSectionDropdownOpen(!isSectionDropdownOpen)}
+                >
+                  <i className="fas fa-list"></i> Jump to Section
+                </button>
+                <div className={`section-dropdown-content ${isSectionDropdownOpen ? 'show' : ''}`}>
+                  {sections.map(section => (
+                    <a 
+                      key={section.id}
+                      href={`#${section.id}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleJumpToSection(section.id);
+                      }}
+                    >
+                      {section.number === "0" ? "Introduction" : `${section.number}. ${section.title.replace(/^\d+\.\s*/i, '')}`}
+                    </a>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Paper Title */}
           <h2 className="paper-title">

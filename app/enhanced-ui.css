@@ -13,7 +13,7 @@
   top: 56px; /* Fixed header height */
   z-index: 20;
   background-color: inherit;
-  padding: 0.5rem 0;
+  padding: 0.25rem 0;
   border-bottom: 1px solid var(--border-color, #4a5568);
   max-width: 800px;
   margin: 0 auto;
@@ -39,7 +39,7 @@
 
 .sticky-section-title {
   position: sticky;
-  top: 120px; /* Header + sticky header height */
+  top: 100px; /* Header + sticky header height */
   padding: 0.5rem 0;
   background-color: inherit;
   z-index: 19;
@@ -50,6 +50,9 @@
   max-width: 800px;
   margin: 0 auto;
   width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 /* Reading area styles */
@@ -123,7 +126,6 @@
 .section-navigation {
   position: relative;
   display: inline-block;
-  margin: 0.5rem 0;
 }
 
 .section-dropdown-button {
